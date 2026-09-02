@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import PIOverview from "./PIOverview";
-import PITimeline from "./PITimeline";
+import PIOverview from "./Pioverview";
+import PITimeline from "./Pitimeline";
+
 
 const PIotherdetails = ({ instruction }: any) => {
   const [activeTab, setActiveTab] = useState("overview");

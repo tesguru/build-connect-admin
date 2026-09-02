@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import WFOverview from "./WFOverview";
-import WFTimeline from "./WFTimeline";
+import WFOverview from "./Wfoverview";
+import WFTimeline from "./Wftimeline";
+
 
 const WFOtherdetails = ({ funding }: any) => {
   const [activeTab, setActiveTab] = useState("overview");
