@@ -4,7 +4,7 @@ import { decryptData, encryptData } from "./cryptohelper";
 import { useAuthStore } from "../store/Authstore";
 
 const axiosInstance: AxiosInstance = Axios.create({
-  baseURL: "https://admin-buildconnect.ivantage.africa/v1/",
+  baseURL: "https://buildconnect-admin-api.ivantage.africa/v1/",
   timeout: 60000,
 });
 
