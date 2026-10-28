@@ -1,13 +1,10 @@
-import Button from '@/components/ui/Button/Button';
 import { SectionLoader } from '@/components/ui/Custom/LoadingState';
 import { DataTable } from '@/components/ui/Datatable';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useUsers } from '@/libs/hooks/useUsers';
 import { UserDetailsProps } from '../../UserDetails/UserDetails';
 
 const Bids = ({ id }: UserDetailsProps) => {
-  const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
   const [search, setSearch] = useState('');
@@ -30,23 +27,6 @@ const Bids = ({ id }: UserDetailsProps) => {
     status: bid.status,
     submittedAt: new Date(bid.submittedAt).toLocaleDateString(),
   }));
-
-  const handleClick = (row: any) => {
-    const id = row.id; 
-    router.push(`/bid-details/${id}`);
-  };
-
-  const actions = [
-    {
-      label: 'View',
-      icon: (
-        <div className="bg-blue-700 hover:bg-blue-700 text-white rounded-md mb-2 px-3 py-1.5 text-sm cursor-pointer transition">
-          View
-        </div>
-      ),
-      onClick: (row: any) => handleClick(row),
-    },
-  ];
 
   const columns = [
     { key: 'projectTitle', header: 'Project Title' },
@@ -73,7 +53,6 @@ const Bids = ({ id }: UserDetailsProps) => {
       <DataTable
         columns={columns}
         data={tableData}
-        actions={actions}
         showSearch={true}
         searchPlaceholder="Search bids..."
         searchableColumns={['projectTitle', 'projectId', 'status']}

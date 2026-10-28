@@ -1,5 +1,4 @@
 import React from 'react'
-import DocumentReviewTable from './DocumentReviewTable'
 import DashboardLayout from '../DashboardLayout/DashboardLayout'
 import { URLS } from '@/libs/constants/pageurl'
 import ActionButton from '@/components/ui/Button/ActionButton'

@@ -1,8 +1,5 @@
-import MetricsCard from "@/components/ui/Custom/MetricsCard";
 import { DataTable } from "@/components/ui/Datatable";
 import { useBid } from "@/libs/hooks/useBid";
-import { AlertCircle, AlertTriangle, Building2, Eye, Clock } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 
 const COLUMNS = [
@@ -62,15 +59,7 @@ const COLUMNS = [
   },
 ];
 
-const METRICS = [
-  { icon: Building2, label: "Total Sent", value: "24", isPositive: true },
-  { icon: Eye,       label: "Viewed",     value: "9",  isPositive: false },
-  { icon: AlertCircle, label: "Responded", value: "8", isPositive: true },
-  { icon: Clock,     label: "Pending",    value: "8",  isPositive: true },
-];
-
 export default function Invitation() {
-  const router = useRouter();
   const [page, setPage]   = useState(1);
   const [limit, setLimit] = useState(8);
   const [search, setSearch] = useState('');
@@ -100,17 +89,6 @@ export default function Invitation() {
     [rawData],
   );
 
-  const actions = useMemo(
-    () => [
-      {
-        label: "View",
-        icon: <Eye className="w-4 h-4 text-gray-600" />,
-        onClick: (row: any) => router.push(`/project-bid-details/${row.id}`),
-      },
-    ],
-    [router],
-  );
-
   return (
     <div className="bg-gray-50">
       <div>
@@ -120,13 +98,10 @@ export default function Invitation() {
         </p>
       </div>
 
-      <MetricsCard metrics={METRICS} />
-
       <div className="max-w-7xl mx-auto">
         <DataTable
           columns={COLUMNS}
           data={tableData}
-          actions={actions}
           rowsPerPageOptions={[5, 8, 10, 20]}
           defaultRowsPerPage={limit}
           showSearch={true}

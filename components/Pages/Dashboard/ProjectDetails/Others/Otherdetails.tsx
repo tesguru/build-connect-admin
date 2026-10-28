@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
 import Overview from './Overview';
-import Projects from './Media';
 import Documentation from './Documentation';
 import Milestones from './Milestone';
-import Media from './Media';
 import Meeting from './Meeting';
 
 const Otherdetails = ({project}:any) => {
@@ -51,10 +49,7 @@ const Otherdetails = ({project}:any) => {
         {activeTab === 'documentation' && (
         <Documentation project={project}/>
         )}
-          {/* {activeTab === 'media' && (
-         <Media/>
-        )} */}
-           {activeTab === 'meetings' && (
+        {activeTab === 'meetings' && (
          <Meeting project={project}/>
         )}
       </div>

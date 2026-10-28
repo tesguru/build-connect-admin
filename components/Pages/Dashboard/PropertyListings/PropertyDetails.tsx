@@ -1,11 +1,10 @@
 import { useProperty } from '@/libs/hooks/useProperty'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import DashboardLayout from '../DashboardLayout/DashboardLayout'
 import { URLS } from '@/libs/constants/pageurl'
 import BackButton from '@/components/ui/BackButton'
 import { PageLoader, Spinner } from '@/components/ui/Custom/LoadingState'
-import { BedDouble, Bath, Ruler, Pencil, RefreshCw, X, FileText, Download } from 'lucide-react'
+import { BedDouble, Bath, Ruler, RefreshCw, FileText, Download } from 'lucide-react'
 
 interface PropertyDetailsProps {
   id: string
@@ -36,7 +35,6 @@ const SelectChip = ({ label, selected, onClick }: { label: string; selected: boo
 )
 
 const PropertyDetails = ({ id }: PropertyDetailsProps) => {
-  const router = useRouter()
   const { singlePropertyQuery, updatePropertyStatus } = useProperty()
 
 
@@ -138,13 +136,6 @@ const PropertyDetails = ({ id }: PropertyDetailsProps) => {
 
         
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => router.push(`/properties/${id}/edit`)}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <Pencil className="w-4 h-4" />
-                Edit
-              </button>
               <button
                 onClick={handleOpenModal}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"

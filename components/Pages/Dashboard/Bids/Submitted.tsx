@@ -1,7 +1,6 @@
-import MetricsCard from "@/components/ui/Custom/MetricsCard";
 import { DataTable } from "@/components/ui/Datatable";
 import { useBid } from "@/libs/hooks/useBid";
-import { AlertCircle, AlertTriangle, Building2, Eye, XCircle } from "lucide-react";
+import { Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 
@@ -67,13 +66,6 @@ const COLUMNS = [
   },
 ];
 
-const METRICS = [
-  { icon: Building2,     label: "Total Bids",     value: "20", isPositive: true },
-  { icon: AlertCircle,   label: "Pending Review", value: "9",  isPositive: false },
-  { icon: AlertTriangle, label: "Approved",        value: "8",  isPositive: true },
-  { icon: XCircle,       label: "Rejected",        value: "8",  isPositive: false },
-];
-
 export default function SubmittedBids() {
   const router = useRouter();
   const [page, setPage]   = useState(1);
@@ -95,6 +87,7 @@ export default function SubmittedBids() {
     () =>
       rawData.map((item: any) => ({
         id:               item.id,
+        builderId:        item.builder?.id      || "",
         project:          item.project?.title   || "N/A",
         builderName:      item.builder?.name    || "N/A",
         builderEmail:     item.builder?.email   || "",
@@ -111,7 +104,8 @@ export default function SubmittedBids() {
       {
         label: "View",
         icon: <Eye className="w-4 h-4 text-gray-600" />,
-        onClick: (row: any) => router.push(`/milestone-details/${row.id}`),
+        onClick: (row: any) =>
+          router.push(`/project-bid-details/${row.id}?userId=${row.builderId}`),
       },
     ],
     [router],
@@ -123,8 +117,6 @@ export default function SubmittedBids() {
         <p className="text-2xl font-bold">Submitted Bids</p>
         <p className="text-md">Review and manage all submitted project bids</p>
       </div>
-
-      <MetricsCard metrics={METRICS} />
 
       <div className="max-w-7xl mx-auto">
         <DataTable

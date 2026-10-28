@@ -27,6 +27,8 @@ getSingleUser: (id: any): Promise<User> =>
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}`),
 getBids: (id: any, params: any): Promise<User> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}/bids`, {params}),
+getBidDetail: (id: string, bidId: string): Promise<any> =>
+    axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}/bids/${bidId}`),
 getActivity: (id: any, params: any): Promise<User> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}/activity`, {params}),
  getProjects: (id: any, params: any): Promise<User> => 

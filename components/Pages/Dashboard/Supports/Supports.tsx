@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../DashboardLayout/DashboardLayout';
 import { URLS } from '@/libs/constants/pageurl';
-import Button from '@/components/ui/Button/Button';
 import Tickets from './Tickets/Tickets';
-import Disputes from './Disputes/Disputes';
 
 
 export default function Supports() {
   const [activeTab, setActiveTab] = useState('tickets');
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const tabs = [
-    { id: 'tickets', label: 'Tickets' },
-    { id: 'disputes', label: 'Disputes' }
+    { id: 'tickets', label: 'Tickets' }
   ];
 
   return (
@@ -45,15 +41,11 @@ export default function Supports() {
               ))}
             </nav>
           </div>
-          
-         
-         
         </div>
      
 
         <div className="mt-6">
           {activeTab === 'tickets' && <Tickets/> }
-          {activeTab === 'disputes' && <Disputes />}
         </div>
       </div>
 

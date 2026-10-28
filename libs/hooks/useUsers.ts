@@ -53,6 +53,14 @@ const bidQuery = (id :string, params: object) => {
     queryFn: () => UserService.getBids(id, params),
   });
 };
+
+const bidDetailQuery = (id: string, bidId: string) => {
+  return useQuery({
+    queryKey: ['userBidDetail', id, bidId],
+    queryFn: () => UserService.getBidDetail(id, bidId),
+    enabled: Boolean(id && bidId),
+  });
+};
  
 const projectsQuery = (id :string, params: object) => {
   return useQuery({
@@ -145,6 +153,7 @@ const createAdminMutation = useMutation({
     createClientMutation,
     createBuildersMutation,
     bidQuery,
+    bidDetailQuery,
     getAllAccountDeletionQuery,
     requestAccountDeletion,
     adminQuery,

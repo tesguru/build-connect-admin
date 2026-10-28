@@ -1,8 +1,5 @@
-import MetricsCard from "@/components/ui/Custom/MetricsCard";
 import { DataTable } from "@/components/ui/Datatable";
 import { useBid } from "@/libs/hooks/useBid";
-import { AlertCircle, AlertTriangle, Building2, Eye } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 
 const COLUMNS = [
@@ -51,14 +48,7 @@ const COLUMNS = [
   },
 ];
 
-const METRICS = [
-  { icon: Building2, label: "Total EOIs", value: "24", isPositive: true },
-  { icon: AlertCircle, label: "This week", value: "9", isPositive: false },
-  { icon: AlertTriangle, label: "Unique Projects", value: "8", isPositive: true },
-];
-
 export default function EOI() {
-  const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
   const [search, setSearch] = useState('');
@@ -87,17 +77,6 @@ export default function EOI() {
     [rawData],
   );
 
-  const actions = useMemo(
-    () => [
-      {
-        label: "View",
-        icon: <Eye className="w-4 h-4 text-gray-600" />,
-        onClick: (row: any) => router.push(`/project-bid-details/${row.id}`),
-      },
-    ],
-    [router],
-  );
-
   return (
     <div className="bg-gray-50">
       <div>
@@ -107,13 +86,10 @@ export default function EOI() {
         </p>
       </div>
 
-      <MetricsCard metrics={METRICS} />
-
       <div className="max-w-7xl mx-auto">
         <DataTable
           columns={COLUMNS}
           data={tableData}
-          actions={actions}
           rowsPerPageOptions={[5, 8, 10, 20]}
           defaultRowsPerPage={limit}
           showSearch={true}

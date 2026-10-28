@@ -1,18 +1,15 @@
-import Button from '@/components/ui/Button/Button';
 import { DataTable } from '@/components/ui/Datatable';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useUsers } from '@/libs/hooks/useUsers';
 import { UserDetailsProps } from '../../UserDetails/UserDetails';
 
 const Documents = ({ id }: UserDetailsProps) => {
-  const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
   const [search, setSearch] = useState('');
 
   const { documentsQuery } = useUsers();
-  const { data, isLoading, error } = documentsQuery(id, {
+  const { data, isLoading } = documentsQuery(id, {
     page,
     limit,
     search: search || undefined,
@@ -30,27 +27,26 @@ const Documents = ({ id }: UserDetailsProps) => {
     updatedAt: new Date(doc.updatedAt).toLocaleDateString(),
   }));
 
-  const handleClick = (row: any) => {
-    const id = row.id; 
-    router.push(`/document-details/${id}`);
-  };
-
-  const actions = [
-    {
-      label: 'View',
-      icon: (
-        <div className="bg-blue-700 hover:bg-blue-700 text-white rounded-md mb-2 px-3 py-1.5 text-sm cursor-pointer transition">
-          View
-        </div>
-      ),
-      onClick: (row: any) => handleClick(row),
-    },
-  ];
-
   const columns = [
     { key: 'type', header: 'Document Type' },
     { key: 'status', header: 'Status' },
-    { key: 'publicUrl', header: 'Public URL' },
+    {
+      key: 'publicUrl',
+      header: 'Document',
+      render: (row: any) =>
+        row.publicUrl ? (
+          <a
+            href={row.publicUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-blue-600 hover:text-blue-700"
+          >
+            View
+          </a>
+        ) : (
+          <span className="text-gray-400">N/A</span>
+        ),
+    },
     { key: 'createdAt', header: 'Created Date' },
     { key: 'updatedAt', header: 'Updated Date' },
   ];
@@ -65,7 +61,6 @@ const Documents = ({ id }: UserDetailsProps) => {
       <DataTable
         columns={columns}
         data={tableData}
-        actions={actions}
         showSearch={true}
         searchPlaceholder="Search documents..."
         searchableColumns={['type', 'status']}
