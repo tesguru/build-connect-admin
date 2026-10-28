@@ -3,7 +3,6 @@ import { Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useProjects } from "@/libs/hooks/useProjects";
 import ProjectMetrics from "./ProjectMetrics";
-import { UserDetailsProps } from "../UserDetails/UserDetails";
 import { useState, useMemo } from "react";
 
 const COLUMNS = [
@@ -78,17 +77,22 @@ const COLUMNS = [
   },
 ];
 
-export default function ProjectTable({ id }: UserDetailsProps) {
+export default function ProjectTable() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
 
   const { projectsQuery } = useProjects();
-  const { data, isLoading, error } = projectsQuery({ page, limit, id });
+  const { data, isLoading } = projectsQuery({
+    page,
+    limit,
+    search: search || undefined,
+  });
 
   const projects = data?.data?.data?.items || [];
   const stats = data?.data?.data?.stats || [];
-  const totalCount: number = data?.data?.data?.meta?.totalDocuments ?? 0;
+  const totalCount: number = data?.data?.data?.meta?.totalDocuments ?? projects.length;
 
   const actions = useMemo(
     () => [
@@ -100,14 +104,6 @@ export default function ProjectTable({ id }: UserDetailsProps) {
     ],
     [router],
   );
-
-  if (error) {
-    return (
-      <div className="text-red-500 text-center p-4">
-        Error loading projects: {(error as Error).message}
-      </div>
-    );
-  }
 
   return (
     <div className="bg-gray-50 p-6 min-h-screen">
@@ -131,6 +127,10 @@ export default function ProjectTable({ id }: UserDetailsProps) {
           totalCount={totalCount}
           currentPage={page}
           onPageChange={(newPage) => setPage(newPage)}
+          onSearchChange={(term) => {
+            setSearch(term);
+            setPage(1);
+          }}
           onRowsPerPageChange={(newLimit) => {
             setLimit(newLimit);
             setPage(1);

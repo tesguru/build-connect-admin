@@ -42,7 +42,7 @@ export function PropertyCard({
         </p>
 
         <p className="text-2xl font-bold text-gray-900">
-          {typeof price === "number" ? `$${price.toLocaleString()}` : price}
+          {typeof price === "number" ? `₦${price.toLocaleString()}` : price}
         </p>
       </div>
     </div>

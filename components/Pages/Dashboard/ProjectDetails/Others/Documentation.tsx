@@ -1,15 +1,26 @@
 import { DataTable } from "@/components/ui/Datatable";
+import { SectionLoader } from "@/components/ui/Custom/LoadingState";
 import { Eye, Download, FileText, Image, File, PlusIcon } from "lucide-react";
 import { useProjects } from "@/libs/hooks/useProjects";
 import { UserDetailsProps } from "../../UserDetails/UserDetails";
 import ActionButton from "@/components/ui/Button/ActionButton";
+import { useState } from "react";
 
 
 export default function Documentation({ project }: any) {
   const { getDocuments } = useProjects(); 
-  const { data, isLoading, error } = getDocuments(project?.id);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
+
+  const { data, isLoading } = getDocuments(project?.id, {
+    page,
+    limit,
+    search: search || undefined,
+  });
 
   const documents = data?.data?.data || [];
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? documents.length;
 
   console.log(project);
   const formatDate = (dateString: string) => {
@@ -134,28 +145,12 @@ export default function Documentation({ project }: any) {
               href={`/create-documents/${project.id}`}
             />
         </div>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2">Loading documents...</span>
-        </div>
+        <SectionLoader label="Loading documents..." />
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Documentation</h1>
-        </div>
-        <div className="text-red-500 text-center p-4">
-          Error loading documents: {error.message}
-        </div>
-      </div>
-    );
-  }
-
-  if (documents.length === 0) {
+  if (totalCount === 0 && !search) {
     return (
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
@@ -182,7 +177,7 @@ export default function Documentation({ project }: any) {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Documentation</h1>
         <span className="text-sm text-gray-500">
-          {documents.length} document{documents.length !== 1 ? 's' : ''}
+          {totalCount} document{totalCount !== 1 ? 's' : ''}
         </span>
       </div>
 
@@ -190,10 +185,26 @@ export default function Documentation({ project }: any) {
         columns={columns}
         data={documents}
         actions={actions}
+        showSearch={true}
         searchPlaceholder="Search documents..."
         searchableColumns={['fileName', 'type', 'status']}
         showSerialNumber={true}
         isLoading={isLoading}
+        emptyMessage="No documents found"
+        rowsPerPageOptions={[5, 8, 10, 20]}
+        defaultRowsPerPage={limit}
+        serverSide={true}
+        totalCount={totalCount}
+        currentPage={page}
+        onPageChange={(newPage) => setPage(newPage)}
+        onSearchChange={(term) => {
+          setSearch(term);
+          setPage(1);
+        }}
+        onRowsPerPageChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
       />
     </div>
   );

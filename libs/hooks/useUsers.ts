@@ -42,28 +42,28 @@ const singleBuilderQuery = (id: string) => {
 
 const activityQuery = (id :string, params: object) => {
   return useQuery({
-    queryKey: ['activityuser', id, params], 
+    queryKey: ['userActivity', id, params], 
     queryFn: () => UserService.getActivity(id, params),
   });
 };
 
 const bidQuery = (id :string, params: object) => {
   return useQuery({
-    queryKey: ['activityuser', id, params], 
+    queryKey: ['userBids', id, params], 
     queryFn: () => UserService.getBids(id, params),
   });
 };
  
 const projectsQuery = (id :string, params: object) => {
   return useQuery({
-    queryKey: ['projectquery',  params], 
+    queryKey: ['userProjects', id, params], 
     queryFn: () => UserService.getProjects(id, params),
   });
 };
 
 const documentsQuery = (id :string, params: object) => {
   return useQuery({
-    queryKey: ['documents',  params], 
+    queryKey: ['userDocuments', id, params], 
     queryFn: () => UserService.getDocuments(id, params),
   });
 };
@@ -118,6 +118,23 @@ const documentsQuery = (id :string, params: object) => {
   },
 });
 
+const adminQuery = (params: object) => {
+  return useQuery({
+    queryKey: ['admins', params],
+    queryFn: () => UserService.getAdmin(params),
+  });
+};
+
+const createAdminMutation = useMutation({
+  mutationFn: UserService.createAdmin,
+  onSuccess: (data) => {
+    toast.success("Success", "Admin account created successfully");
+  },
+  onError: (error: any) => {
+    handleApiError(error, "Failed to create admin", toast);
+  },
+});
+
   return { 
     userQuery,
     singleUserQuery,
@@ -129,6 +146,8 @@ const documentsQuery = (id :string, params: object) => {
     createBuildersMutation,
     bidQuery,
     getAllAccountDeletionQuery,
-    requestAccountDeletion
+    requestAccountDeletion,
+    adminQuery,
+    createAdminMutation
    };
 };

@@ -2,6 +2,7 @@ import { DataTable } from "@/components/ui/Datatable";
 import { useUsers } from "@/libs/hooks/useUsers";
 import { Eye, X, Check, XCircle } from "lucide-react";
 import { useState, useMemo } from "react";
+import { formatName } from "@/libs/utils/helpers";
 
 const COLUMNS = [
   {
@@ -76,14 +77,16 @@ const COLUMNS = [
 export default function AccountDeletionRequests() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
   const [notes, setNotes] = useState("");
 
   const { getAllAccountDeletionQuery, requestAccountDeletion } = useUsers();
 
-  const { data, isLoading, error, refetch } = getAllAccountDeletionQuery({
+  const { data, isLoading, refetch } = getAllAccountDeletionQuery({
     page,
     limit,
+    search: search || undefined,
   });
 
   const rawData = data?.data?.data || [];
@@ -92,9 +95,7 @@ export default function AccountDeletionRequests() {
   const tableData = useMemo(
     () =>
       rawData.map((item: any) => {
-        const fullName = [item.user?.firstName, item.user?.lastName]
-          .filter(Boolean)
-          .join(" ");
+        const fullName = formatName(item.user?.firstName, item.user?.lastName);
 
         return {
           _raw: item,
@@ -150,14 +151,6 @@ export default function AccountDeletionRequests() {
     );
   };
 
-  if (error) {
-    return (
-      <div className="text-red-500 text-center p-4">
-        Error loading account deletion requests: {(error as Error).message}
-      </div>
-    );
-  }
-
   return (
     <div className="bg-gray-50 mb-4">
       <div>
@@ -183,6 +176,10 @@ export default function AccountDeletionRequests() {
           totalCount={totalCount}
           currentPage={page}
           onPageChange={(newPage) => setPage(newPage)}
+          onSearchChange={(term) => {
+            setSearch(term);
+            setPage(1);
+          }}
           onRowsPerPageChange={(newLimit) => {
             setLimit(newLimit);
             setPage(1);

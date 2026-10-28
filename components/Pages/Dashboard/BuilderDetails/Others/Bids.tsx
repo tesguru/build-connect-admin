@@ -1,4 +1,5 @@
 import Button from '@/components/ui/Button/Button';
+import { SectionLoader } from '@/components/ui/Custom/LoadingState';
 import { DataTable } from '@/components/ui/Datatable';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -7,17 +8,19 @@ import { UserDetailsProps } from '../../UserDetails/UserDetails';
 
 const Bids = ({ id }: UserDetailsProps) => {
   const router = useRouter();
-  // const [isModalOpen, setIsModalOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
 
   const { bidQuery } = useUsers();
-  const { data, isLoading, error } = bidQuery(id, { 
-    page: 1, 
-    limit: 100,
-    id: id
-  });   
+  const { data, isLoading } = bidQuery(id, {
+    page,
+    limit,
+    search: search || undefined,
+  });
   
   const bids = data?.data?.data || [];
-  console.log('Bids data:', bids);
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? bids.length;
 
   const tableData = bids.map((bid: any) => ({
     id: bid.id,
@@ -56,22 +59,11 @@ const Bids = ({ id }: UserDetailsProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2">Loading bids...</span>
-      </div>
+      <SectionLoader label="Loading bids..." />
     );
   }
 
  
-  if (error) {
-    return (
-      <div className="text-red-500 text-center p-4">
-        Error loading bids: {error.message}
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -86,6 +78,20 @@ const Bids = ({ id }: UserDetailsProps) => {
         searchPlaceholder="Search bids..."
         searchableColumns={['projectTitle', 'projectId', 'status']}
         isLoading={isLoading}
+        rowsPerPageOptions={[5, 8, 10, 20]}
+        defaultRowsPerPage={limit}
+        serverSide={true}
+        totalCount={totalCount}
+        currentPage={page}
+        onPageChange={(newPage) => setPage(newPage)}
+        onSearchChange={(term) => {
+          setSearch(term);
+          setPage(1);
+        }}
+        onRowsPerPageChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
       />
     </>
   );

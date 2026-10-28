@@ -61,14 +61,18 @@ export default function EOI() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
 
   const { expressionOfInterestMutation } = useBid();
-  const { data, isLoading, error } = expressionOfInterestMutation({ page, limit });
+  const { data, isLoading } = expressionOfInterestMutation({
+    page,
+    limit,
+    search: search || undefined,
+  });
 
  
   const rawData = data?.data?.data || [];
-  console.log(rawData);
-  const totalCount: number = data?.data?.data?.meta?.totalDocuments ?? 0;
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? rawData.length;
 
   const tableData = useMemo(
     () =>
@@ -93,14 +97,6 @@ export default function EOI() {
     ],
     [router],
   );
-
-  if (error) {
-    return (
-      <div className="text-red-500 text-center p-4">
-        Error loading expressions of interest: {(error as Error).message}
-      </div>
-    );
-  }
 
   return (
     <div className="bg-gray-50">
@@ -129,6 +125,10 @@ export default function EOI() {
           totalCount={totalCount}
           currentPage={page}
           onPageChange={(newPage) => setPage(newPage)}
+          onSearchChange={(term) => {
+            setSearch(term);
+            setPage(1);
+          }}
           onRowsPerPageChange={(newLimit) => {
             setLimit(newLimit);
             setPage(1);

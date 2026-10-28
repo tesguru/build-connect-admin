@@ -1,4 +1,6 @@
-import { ArrowLeft, User, Building2, DollarSign, Calendar } from "lucide-react";
+import { ArrowLeft, User, Building2, Calendar } from "lucide-react";
+import { NairaIcon } from "@/components/ui/Custom/NairaIcon";
+import { PageLoader } from "@/components/ui/Custom/LoadingState";
 import DashboardLayout from "../DashboardLayout/DashboardLayout";
 import { URLS } from "@/libs/constants/pageurl";
 import { ProgressBar } from "@/components/ui/Custom/ProgressBar";
@@ -20,12 +22,7 @@ const ProjectDetails = ({ id }: UserDetailsProps) => {
         <div className="bg-gray-50 min-h-screen">
           <div className="p-4">
             <BackButton label="Back" />
-            <div className="mt-4 p-4 flex justify-center items-center h-64">
-              <div className="text-center">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-                <p className="mt-4 text-gray-600">Loading project details...</p>
-              </div>
-            </div>
+            <PageLoader label="Loading project details..." />
           </div>
         </div>
       </DashboardLayout>
@@ -39,8 +36,8 @@ const ProjectDetails = ({ id }: UserDetailsProps) => {
         <div className="bg-gray-50 min-h-screen">
           <div className="p-4">
             <BackButton label="Back" />
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-600">Error loading project details. Please try again.</p>
+            <div className="mt-4 p-8 text-center text-sm text-gray-500">
+              No data available
             </div>
           </div>
         </div>
@@ -77,9 +74,9 @@ const ProjectDetails = ({ id }: UserDetailsProps) => {
       value: project?.builder?.name ?? "Abc Constructions"
     },
     {
-      icon: DollarSign,
+      icon: NairaIcon,
       label: 'Budget',
-      value: project?.budgetAmount ? `$${project.budgetAmount}` : "0"
+      value: project?.budgetAmount ? `₦${Number(project.budgetAmount).toLocaleString()}` : "₦0"
     },
   ];
 

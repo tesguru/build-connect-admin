@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/libs/hooks/useAuth';
 import { verifyOtpInput, verifyOtpSchema } from '@/libs/schema/authschema';
 import Button from '@/components/ui/Button/Button';
+import { Spinner } from '@/components/ui/Custom/LoadingState';
 import Link from 'next/link';
 import { URLS } from '@/libs/constants/pageurl';
 
@@ -101,7 +102,14 @@ const VerifyOtp = () => {
             disabled={resendOtpMutation.isPending || !email}
             className="text-blue-600 font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {resendOtpMutation.isPending ? 'Resending...' : 'Resend'}
+            {resendOtpMutation.isPending ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Spinner className="h-3.5 w-3.5" />
+                Resending...
+              </span>
+            ) : (
+              'Resend'
+            )}
           </button>
         </p>
 

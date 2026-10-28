@@ -1,5 +1,7 @@
 import { DataTable } from "@/components/ui/Datatable";
+import { SectionLoader } from "@/components/ui/Custom/LoadingState";
 import { useUsers } from "@/libs/hooks/useUsers";
+import { useState } from "react";
 
 interface ProjectsProps {
   id: string;
@@ -22,10 +24,15 @@ interface Project {
 
 export default function Projects({ id }: ProjectsProps) {
   const { projectsQuery } = useUsers();
-  const { data, isLoading, error } = projectsQuery(id, { 
-    page: 1, 
-    limit: 100
-  }); 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
+
+  const { data, isLoading } = projectsQuery(id, {
+    page,
+    limit,
+    search: search || undefined,
+  });
 
 
   const clientProjects = data?.data?.data?.map((project: Project) => ({
@@ -43,6 +50,8 @@ export default function Projects({ id }: ProjectsProps) {
     budgetMax: project.budgetMax,
     createdAt: project.createdAt
   })) || [];
+
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? clientProjects.length;
 
  
 
@@ -91,20 +100,7 @@ export default function Projects({ id }: ProjectsProps) {
     return (
       <div className="bg-gray-50 p-6">
         <p className="text-2xl font-bold mb-4">Client Projects</p>
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-gray-50 p-6">
-        <p className="text-2xl font-bold mb-4">Client Projects</p>
-        <div className="text-red-500 text-center p-4">
-          Error loading projects: {error.message}
-        </div>
+        <SectionLoader label="Loading projects..." />
       </div>
     );
   }
@@ -122,12 +118,25 @@ export default function Projects({ id }: ProjectsProps) {
           columns={columns}
           data={clientProjects}
           rowsPerPageOptions={[5, 8, 10, 20]}
-          defaultRowsPerPage={8}
+          defaultRowsPerPage={limit}
+          showSearch={true}
           searchPlaceholder="Search projects..."
           searchableColumns={["projectName", "location"]}
           showSerialNumber={true}
           isLoading={isLoading}
           emptyMessage="No projects found"
+          serverSide={true}
+          totalCount={totalCount}
+          currentPage={page}
+          onPageChange={(newPage) => setPage(newPage)}
+          onSearchChange={(term) => {
+            setSearch(term);
+            setPage(1);
+          }}
+          onRowsPerPageChange={(newLimit) => {
+            setLimit(newLimit);
+            setPage(1);
+          }}
         />
       </div>
     </div>

@@ -22,11 +22,11 @@ interface PaginatedResponse<T> {
 
 export const BidService = {
 
-  expressionInterest: (id: any,): Promise<User> => 
-    axiosInstance.get(`${APIURLS.DASHBOARD.BIDS}/expressions-of-interest`),
-    bidInvitations: (id: any,): Promise<User> => 
-    axiosInstance.get(`${APIURLS.DASHBOARD.BIDS}/invitations`),
-    submittedBids: (id: any,): Promise<User> => 
-    axiosInstance.get(`${APIURLS.DASHBOARD.BIDS}/submitted`),
+  expressionInterest: (params?: any) => 
+    axiosInstance.get(`${APIURLS.DASHBOARD.BIDS}/expressions-of-interest`, { params }),
+    bidInvitations: (params?: any) => 
+    axiosInstance.get(`${APIURLS.DASHBOARD.BIDS}/invitations`, { params }),
+    submittedBids: (params?: any) => 
+    axiosInstance.get(`${APIURLS.DASHBOARD.BIDS}/submitted`, { params }),
 };
 

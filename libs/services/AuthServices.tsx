@@ -12,5 +12,4 @@ export const AuthService = {
    requestotp:(data: any) => axiosInstance.post(APIURLS.AUTH.VERIFYOTP, data),
   resetpassword:(data: any) => axiosInstance.post(APIURLS.AUTH.CHANGEPASSWORD, data),
     refreshtoken:(data: any) => axiosInstance.post(APIURLS.AUTH.REFRESHTOKEN, data),
-  logout: () => axiosInstance.post('/auth/logout'),
 };

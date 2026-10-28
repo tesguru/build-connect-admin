@@ -9,6 +9,8 @@ import { AlertCircle, AlertTriangle, Building2 } from 'lucide-react'
 import MetricsCard from '@/components/ui/Custom/MetricsCard'
 import BackButton from '@/components/ui/BackButton'
 import { useUsers } from '@/libs/hooks/useUsers'
+import { formatName, formatStatus } from '@/libs/utils/helpers'
+import { PageLoader } from '@/components/ui/Custom/LoadingState'
 
 export interface UserDetailsProps {
   id: string;
@@ -24,9 +26,7 @@ const UserDetails = ({ id }: UserDetailsProps) => {
   if (isLoading) {
     return (
       <DashboardLayout urlpath={URLS.DASHBOARD.USERS}>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
+        <PageLoader label="Loading user details..." />
       </DashboardLayout>
     );
   }
@@ -34,8 +34,8 @@ const UserDetails = ({ id }: UserDetailsProps) => {
   if (error) {
     return (
       <DashboardLayout urlpath={URLS.DASHBOARD.USERS}>
-        <div className="text-red-500 text-center p-4">
-          Error loading user: {error.message}
+        <div className="text-center p-8 text-sm text-gray-500">
+          No data available
         </div>
       </DashboardLayout>
     );
@@ -91,10 +91,20 @@ const UserDetails = ({ id }: UserDetailsProps) => {
         <div className="mt-9">
           <div className="flex gap-4 mb-4">
             <p className="text-gray-800 font-semibold">
-              {user.firstName} {user.lastName}
+              {formatName(user.firstName, user.lastName)}
             </p>
-            <Button className="text-xs bg-gray-200 text-yellow-500 capitalize">
-              {user.verificationStatus || 'pending'}
+            <Button
+              className={`text-xs ${
+                user.verificationStatus === 'verified'
+                  ? 'bg-green-100 text-green-600'
+                  : user.verificationStatus === 'pending'
+                  ? 'bg-yellow-100 text-yellow-600'
+                  : user.verificationStatus === 'rejected'
+                  ? 'bg-red-100 text-red-600'
+                  : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              {formatStatus(user.verificationStatus) || 'Pending'}
             </Button>
           </div>
    

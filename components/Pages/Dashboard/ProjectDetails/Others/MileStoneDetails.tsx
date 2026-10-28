@@ -1,5 +1,6 @@
 import React from 'react';
 import { useProjects } from '@/libs/hooks/useProjects';
+import { PageLoader } from '@/components/ui/Custom/LoadingState';
 
 interface MileStoneDetailsProps {
   id: string;
@@ -26,28 +27,22 @@ const MileStoneDetails = ({ id, milestoneId }: MileStoneDetailsProps) => {
 
   // Format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-NG', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'NGN',
     }).format(amount);
   };
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6 sm:p-8">
-        <div className="h-8 w-64 bg-gray-200 rounded mb-6"></div>
-        <div className="h-24 w-full bg-gray-200 rounded mb-6"></div>
-        <div className="h-40 w-full bg-gray-200 rounded"></div>
-      </div>
-    );
+    return <PageLoader label="Loading milestone..." />;
   }
 
   // Error state
   if (error) {
     return (
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6 sm:p-8">
-        <p className="text-red-600">Error loading milestone details.</p>
+        <p className="text-center text-sm text-gray-500">No data available</p>
       </div>
     );
   }

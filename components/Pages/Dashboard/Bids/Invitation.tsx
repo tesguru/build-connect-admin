@@ -73,13 +73,18 @@ export default function Invitation() {
   const router = useRouter();
   const [page, setPage]   = useState(1);
   const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
 
   const { bidInvitationQuery } = useBid();
-  const { data, isLoading, error } = bidInvitationQuery({ page, limit });
+  const { data, isLoading } = bidInvitationQuery({
+    page,
+    limit,
+    search: search || undefined,
+  });
 
   // API shape: { data: { data: [...], meta: { totalDocuments } } }
   const rawData   = data?.data?.data  || [];
-  const totalCount: number = data?.data?.meta?.totalDocuments ?? 0;
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? rawData.length;
 
   const tableData = useMemo(
     () =>
@@ -105,14 +110,6 @@ export default function Invitation() {
     ],
     [router],
   );
-
-  if (error) {
-    return (
-      <div className="text-red-500 text-center p-4">
-        Error loading bid invitations: {(error as Error).message}
-      </div>
-    );
-  }
 
   return (
     <div className="bg-gray-50">
@@ -142,6 +139,10 @@ export default function Invitation() {
           totalCount={totalCount}
           currentPage={page}
           onPageChange={(newPage) => setPage(newPage)}
+          onSearchChange={(term) => {
+            setSearch(term);
+            setPage(1);
+          }}
           onRowsPerPageChange={(newLimit) => {
             setLimit(newLimit);
             setPage(1);

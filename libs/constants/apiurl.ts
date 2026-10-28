@@ -17,6 +17,7 @@ export const APIURLS = {
     BIDS: '/admin/bids',
     DOCUMENTS: '/admin/documents',
     MEETINGS: '/admin/meetings',
+    ADMIN: '/admin/admins',
     ESCROW: '/admin/escrows',
     PROPERTY: '/admin/properties',
     MORTGAGE: '/admin/mortgage-applications',

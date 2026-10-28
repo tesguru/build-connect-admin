@@ -13,21 +13,21 @@ const { toast } = useToast();
  
 const expressionOfInterestMutation = ( params: object) => {
   return useQuery({
-    queryKey: ['expressionofinterestmutation',  params], 
+    queryKey: ['bidExpressionsOfInterest',  params], 
     queryFn: () => BidService.expressionInterest(params),
   });
 };
 
 const bidInvitationQuery = ( params: object) => {
   return useQuery({
-    queryKey: ['bidInvitationQuery',  params], 
+    queryKey: ['bidInvitations',  params], 
     queryFn: () => BidService.bidInvitations(params),
   });
 };
 
 const submittedQuery = ( params: object) => {
   return useQuery({
-    queryKey: ['ubmittedQuery',  params], 
+    queryKey: ['bidSubmitted',  params], 
     queryFn: () => BidService.submittedBids(params),
   });
 };

@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useToast } from './usetoast';
 import { useAuthStore } from '../store/Authstore';
@@ -7,12 +7,9 @@ import { handleApiError } from '../utils/handleapierror';
 import { URLS } from '../constants/pageurl';
 import { encryptUrl } from '../utils/helpers';
 
-
-
-
-
 export const useAuth = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const {setAuthData, clearAuthData} = useAuthStore();
 const { toast } = useToast();
   const loginMutation = useMutation({
@@ -118,14 +115,12 @@ router.push(
   }
   });
 
-  const logoutMutation = useMutation({
-    mutationFn: AuthService.logout,
-    onSuccess: () => {
-  clearAuthData();
-      router.push('/login');
-    },
-  });
-
+  // The API has no logout route, so logging out is a local session clear.
+  const logout = () => {
+    clearAuthData();
+    queryClient.clear();
+    router.replace(URLS.AUTH.LOGIN);
+  };
 
   return { 
     loginMutation, 
@@ -133,7 +128,7 @@ router.push(
     forgotPasswordMutation,
     verifyOtpMutation,
     resendOtpMutation,
-    logoutMutation,
+    logout,
     resetPasswordMutation,
     refreshTokenMutation
    };

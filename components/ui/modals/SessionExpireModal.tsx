@@ -78,7 +78,7 @@ const SessionExpiredModal = () => {
   const handleLogout = () => {
     clearAuthData();
     setShowModal(false);
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   const handleStayLoggedIn = () => {
@@ -120,7 +120,7 @@ const SessionExpiredModal = () => {
               disabled={isPending}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             >
-              {isPending ? 'Refreshing...' : 'Refresh Session'}
+              Refresh Session
             </Button>
 
             <Button

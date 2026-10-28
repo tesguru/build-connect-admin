@@ -44,16 +44,18 @@ const COLUMNS = [
 export default function DocumentReviewTable() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
 
   const { getDocumentsQuery } = useDocuments();
   const { data, isLoading, error } = getDocumentsQuery({
     page,
     limit,
+    search: search || undefined,
   });
 
   // API shape: { data: [...], meta: { totalDocuments, totalPage, page, count } }
   const rawData = data?.data?.data || [];
-  const totalCount: number = data?.data?.data?.meta?.totalDocuments ?? 0;
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? rawData.length;
 
 
   const tableData = useMemo(
@@ -122,6 +124,10 @@ export default function DocumentReviewTable() {
         totalCount={totalCount}
         currentPage={page}
         onPageChange={(newPage) => setPage(newPage)}
+        onSearchChange={(term) => {
+          setSearch(term);
+          setPage(1);
+        }}
         onRowsPerPageChange={(newLimit) => {
           setLimit(newLimit);
           setPage(1);

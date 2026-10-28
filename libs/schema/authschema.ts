@@ -11,6 +11,17 @@ export const createAccountSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters")
 });
 
+export const createAdminSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  phoneNumber: z.string().min(4, "Phone number is required"),
+  location: z.string().min(2, "Location is required"),
+  role: z.enum(["super_admin", "supervisor", "operations", "support"]),
+});
+
+export type createAdminInput = z.infer<typeof createAdminSchema>;
+
 export const loginSchema = z.object({
   email: z
     .string()

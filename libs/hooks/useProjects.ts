@@ -12,7 +12,7 @@ const { toast } = useToast();
  
 const projectsQuery = ( params: object) => {
   return useQuery({
-    queryKey: ['projectquery',  params], 
+    queryKey: ['projects',  params], 
     queryFn: () => ProjectService.getAllProjects(params),
   });
 };
@@ -65,35 +65,35 @@ const projectsQuery = ( params: object) => {
 
   const singleProjectQuery = (id :any) => {
     return useQuery({
-      queryKey: ['singleProjects', id], 
+      queryKey: ['singleProject', id], 
       queryFn: () => ProjectService.getSingleProject(id),
     });
   };
 
-    const getMilestoneQuery = (id :any) => {
+    const getMilestoneQuery = (id :any, params?: object) => {
     return useQuery({
-      queryKey: ['getMilestones', id], 
-      queryFn: () => ProjectService.getMilestones(id),
+      queryKey: ['projectMilestones', id, params], 
+      queryFn: () => ProjectService.getMilestones(id, params),
     });
   };
    const getMilestoneDetailsQuery = (id :any, milestoneId: any) => {
     return useQuery({
-      queryKey: ['getMilestones', id], 
+      queryKey: ['milestoneDetails', id, milestoneId], 
       queryFn: () => ProjectService.getMilestonesDetails(id, milestoneId ),
     });
   };
 
-  const getDocuments = (id :any) => {
+  const getDocuments = (id :any, params?: object) => {
     return useQuery({
-      queryKey: ['getDocuments', id], 
-      queryFn: () => ProjectService.getDocuments(id),
+      queryKey: ['projectDocuments', id, params], 
+      queryFn: () => ProjectService.getDocuments(id, params),
     });
   };
 
-  const getMeetings = (id :any) => {
+  const getMeetings = (id :any, params?: object) => {
     return useQuery({
-      queryKey: ['getMeetings', id], 
-      queryFn: () => ProjectService.getMeetings(id),
+      queryKey: ['projectMeetings', id, params], 
+      queryFn: () => ProjectService.getMeetings(id, params),
     });
   };
 

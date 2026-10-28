@@ -1,5 +1,6 @@
 import React from 'react';
-import { Target, Calendar, DollarSign } from 'lucide-react';
+import { Target, Calendar } from 'lucide-react';
+import { NairaIcon } from '@/components/ui/Custom/NairaIcon';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import DashboardLayout from '../DashboardLayout/DashboardLayout';
@@ -89,8 +90,7 @@ export default function CreateMilestoneForm({ id }: UserDetailsProps) {
                   label="Amount"
                   id="amount"
                   placeholder="1,000,000"
-                  icon={<DollarSign />}
-                  currency
+                  icon={<NairaIcon className="w-5 h-5" />}
                   error={errors.amount?.message}
                   required
                   {...field}

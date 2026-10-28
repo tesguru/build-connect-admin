@@ -8,8 +8,10 @@ import Otherdetails from './Others/Otherdetails'
 import { AlertCircle, AlertTriangle, Building2 } from 'lucide-react'
 import BackButton from '@/components/ui/BackButton'
 import { useUsers } from '@/libs/hooks/useUsers'
+import { formatName, formatStatus } from '@/libs/utils/helpers'
 import MetricsCard from '@/components/ui/Custom/MetricsCard'
 import { UserDetailsProps } from '../UserDetails/UserDetails'
+import { PageLoader } from '@/components/ui/Custom/LoadingState'
 
 const BuilderDetails = ({ id }: UserDetailsProps) => {
   console.log('Builder ID:', id)
@@ -24,10 +26,7 @@ const BuilderDetails = ({ id }: UserDetailsProps) => {
     return (
       <DashboardLayout urlpath={URLS.DASHBOARD.USERS}>
         <BackButton label="Back" />
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2">Loading builder details...</span>
-        </div>
+        <PageLoader label="Loading builder details..." />
       </DashboardLayout>
     )
   }
@@ -37,8 +36,8 @@ const BuilderDetails = ({ id }: UserDetailsProps) => {
     return (
       <DashboardLayout urlpath={URLS.DASHBOARD.USERS}>
         <BackButton label="Back" />
-        <div className="text-red-500 text-center p-4">
-          Error loading builder: {error.message}
+        <div className="text-center p-8 text-sm text-gray-500">
+          No data available
         </div>
       </DashboardLayout>
     )
@@ -107,16 +106,18 @@ const BuilderDetails = ({ id }: UserDetailsProps) => {
         <div className="mt-2">
           <div className="flex gap-4 mb-4 items-center">
             <p className="text-gray-800 font-semibold text-lg">
-              {user.firstName} {user.lastName}
+              {formatName(user.firstName, user.lastName)}
             </p>
-            <Button className={`text-xs capitalize ${
+            <Button className={`text-xs ${
               user.verificationStatus === 'verified' 
                 ? 'bg-green-100 text-green-600' 
                 : user.verificationStatus === 'pending'
                 ? 'bg-yellow-100 text-yellow-600'
-                : 'bg-red-100 text-red-600'
+                : user.verificationStatus === 'rejected'
+                ? 'bg-red-100 text-red-600'
+                : 'bg-gray-100 text-gray-600'
             }`}>
-              {user.verificationStatus || 'pending'}
+              {formatStatus(user.verificationStatus) || 'Pending'}
             </Button>
           </div>
    

@@ -8,7 +8,6 @@ const axiosInstance: AxiosInstance = Axios.create({
   timeout: 60000,
 });
 
-// ─── Request Interceptor ──────────────────────────────────────────────────────
 
 axiosInstance.interceptors.request.use(
   async (config) => {
@@ -26,7 +25,7 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ─── Refresh Token Queue Logic ────────────────────────────────────────────────
+
 
 let isRefreshing = false;
 let failedQueue: {
@@ -45,7 +44,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-// ─── Response Interceptor ─────────────────────────────────────────────────────
+
 
 axiosInstance.interceptors.response.use(
   (response) => response,

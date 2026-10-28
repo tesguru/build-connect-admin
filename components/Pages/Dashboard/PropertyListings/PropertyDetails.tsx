@@ -4,6 +4,7 @@ import { useState } from 'react'
 import DashboardLayout from '../DashboardLayout/DashboardLayout'
 import { URLS } from '@/libs/constants/pageurl'
 import BackButton from '@/components/ui/BackButton'
+import { PageLoader, Spinner } from '@/components/ui/Custom/LoadingState'
 import { BedDouble, Bath, Ruler, Pencil, RefreshCw, X, FileText, Download } from 'lucide-react'
 
 interface PropertyDetailsProps {
@@ -53,12 +54,7 @@ const PropertyDetails = ({ id }: PropertyDetailsProps) => {
       <DashboardLayout urlpath={URLS.DASHBOARD.PROPERTIES}>
         <div className="bg-gray-50 min-h-screen p-4">
           <BackButton label="Back" />
-          <div className="mt-4 flex justify-center items-center h-64">
-            <div className="text-center">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent" />
-              <p className="mt-4 text-gray-600">Loading property...</p>
-            </div>
-          </div>
+          <PageLoader label="Loading property..." />
         </div>
       </DashboardLayout>
     )
@@ -70,8 +66,8 @@ const PropertyDetails = ({ id }: PropertyDetailsProps) => {
       <DashboardLayout urlpath={URLS.DASHBOARD.PROPERTIES}>
         <div className="bg-gray-50 min-h-screen p-4">
           <BackButton label="Back" />
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-600">Error loading property. Please try again.</p>
+          <div className="mt-4 p-8 text-center text-sm text-gray-500">
+            No data available
           </div>
         </div>
       </DashboardLayout>
@@ -327,7 +323,7 @@ const PropertyDetails = ({ id }: PropertyDetailsProps) => {
               >
                 {updatePropertyStatus.isPending ? (
                   <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent" />
+                    <Spinner className="h-4 w-4" />
                     Updating...
                   </>
                 ) : (

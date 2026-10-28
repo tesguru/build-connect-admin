@@ -3,7 +3,8 @@ import DashboardLayout from '../DashboardLayout/DashboardLayout';
 import BackButton from '@/components/ui/BackButton';
 import { URLS } from '@/libs/constants/pageurl';
 import { ProgressBar } from '@/components/ui/Custom/ProgressBar';
-import { Building2, Calendar, DollarSign, User } from 'lucide-react';
+import { Building2, Calendar, User } from 'lucide-react';
+import { NairaIcon } from '@/components/ui/Custom/NairaIcon';
 import Button from '@/components/ui/Button/Button';
 import { InfoGrid, InfoItem } from '@/components/ui/Custom/Infogrid';
 import { useProjects } from '@/libs/hooks/useProjects';
@@ -23,7 +24,7 @@ const ProjectBidDetails = () => {
           value: 'Mike Chen'
         },
         {
-          icon: DollarSign,
+          icon: NairaIcon,
           label: 'Budget',
           value: '₦15,000,000'
         },

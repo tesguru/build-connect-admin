@@ -1,4 +1,4 @@
-import { User, Building2, DollarSign, Hash, RefreshCw } from "lucide-react";
+import { User, Building2, Hash, RefreshCw } from "lucide-react";
 import { URLS } from "@/libs/constants/pageurl";
 import BackButton from "@/components/ui/BackButton";
 import { InfoGrid, InfoItem } from "@/components/ui/Custom/Infogrid";
@@ -6,6 +6,8 @@ import DashboardLayout from "../../DashboardLayout/DashboardLayout";
 import PIotherdetails from "./Piotherdetails";
 import { useEscrow } from "@/libs/hooks/useEscrow";
 import { useState } from "react";
+import { NairaIcon } from "@/components/ui/Custom/NairaIcon";
+import { PageLoader, Spinner } from "@/components/ui/Custom/LoadingState";
 
 interface PaymentInstructionDetailsProps {
   id: string;
@@ -53,14 +55,7 @@ const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
         <div className="bg-gray-50 min-h-screen">
           <div className="p-4">
             <BackButton label="Back" />
-            <div className="mt-4 p-4 flex justify-center items-center h-64">
-              <div className="text-center">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent" />
-                <p className="mt-4 text-gray-600">
-                  Loading payment instruction...
-                </p>
-              </div>
-            </div>
+            <PageLoader label="Loading payment instruction..." />
           </div>
         </div>
       </DashboardLayout>
@@ -92,7 +87,7 @@ const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
         "Not specified",
     },
     {
-      icon: DollarSign,
+      icon: NairaIcon,
       label: "Amount",
       value: instruction.amount
         ? `${instruction.currency ?? "NGN"} ${Number(instruction.amount).toLocaleString()}`
@@ -245,7 +240,7 @@ const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
               >
                 {updatePaymentInstructions.isPending ? (
                   <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent" />
+                    <Spinner className="h-4 w-4" />
                     Updating...
                   </>
                 ) : (

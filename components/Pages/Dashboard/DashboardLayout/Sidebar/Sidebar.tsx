@@ -10,16 +10,16 @@ import {
   Building2,
   CreditCard,
   FileText,
-  Calendar,
   MessageSquare,
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  ChevronDown
 } from "lucide-react";
 import { BuildConnectLogo } from "@/libs/constants/image";
 import { URLS } from "@/libs/constants/pageurl";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/libs/hooks/useAuth";
 
 interface MenuItem {
   id: string;
@@ -135,13 +135,6 @@ export const Sidebar = ({ activePath }: SidebarProps) => {
       active: activePath === URLS.DASHBOARD.DOCUMENTS
     },
     { 
-      id: 'meetings', 
-      label: 'Meetings', 
-      icon: Calendar, 
-      href: URLS.DASHBOARD.MEETINGS || '/meetings',
-      active: activePath === (URLS.DASHBOARD.MEETINGS || '/meetings')
-    },
-    { 
       id: 'support', 
       label: 'Support', 
       icon: MessageSquare, 
@@ -163,9 +156,10 @@ export const Sidebar = ({ activePath }: SidebarProps) => {
       [itemId]: !prev[itemId]
     }));
   };
-   const router = useRouter();
+   const { logout } = useAuth();
   const handleLogout = () => {
-   router.push('/')
+    setIsMobileOpen(false);
+    logout();
   };
 
   return (
@@ -184,7 +178,7 @@ export const Sidebar = ({ activePath }: SidebarProps) => {
       <div
         id="sidebar"
         className={`
-          fixed md:relative z-40 w-64 bg-white  h-screen border-r b border-gray-200 flex flex-col
+          fixed md:relative z-40 w-64 bg-white h-screen border-r border-gray-200 flex flex-col
           transform transition-transform duration-300 ease-in-out
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
@@ -217,8 +211,8 @@ export const Sidebar = ({ activePath }: SidebarProps) => {
                     <div
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all duration-200 ${
                         item.active
-                          ? 'bg-blue-500 text-white '
-                          : 'text- hover:bg-gray-50 hover:text-gray-900'
+                          ? 'bg-blue-500 text-white shadow-sm'
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                       }`}
                     >
                       <div className="flex items-center space-x-3">
@@ -300,7 +294,7 @@ export const Sidebar = ({ activePath }: SidebarProps) => {
 
       {isMobileOpen && (
         <div 
-          className="md:hidden fixed inset-0 bg-opacity-50 z-30"
+          className="md:hidden fixed inset-0 bg-black/50 z-30"
           onClick={() => setIsMobileOpen(false)}
           aria-hidden="true"
         />

@@ -3,6 +3,7 @@ import { useEscrow } from "@/libs/hooks/useEscrow";
 import { Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
+import { formatName } from "@/libs/utils/helpers";
 
 const COLUMNS = [
   {
@@ -81,9 +82,14 @@ export default function PaymentInstructions() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
 
   const { paymentInstructions } = useEscrow();
-  const { data, isLoading, error } = paymentInstructions({ page, limit });
+  const { data, isLoading } = paymentInstructions({
+    page,
+    limit,
+    search: search || undefined,
+  });
 
   const rawData = data?.data?.data || [];
   const totalCount: number = data?.data?.meta?.totalDocuments ?? rawData.length;
@@ -97,8 +103,16 @@ export default function PaymentInstructions() {
         // Display fields
         id: item.id,
         project: item.project?.title || "N/A",
-        client: item.client?.name || item.client?.email || "N/A",
-        builder: item.builder?.name || item.builder?.email || "N/A",
+        client:
+          formatName(item.client?.name) ||
+          formatName(item.client?.firstName, item.client?.lastName) ||
+          item.client?.email ||
+          "N/A",
+        builder:
+          formatName(item.builder?.name) ||
+          formatName(item.builder?.firstName, item.builder?.lastName) ||
+          item.builder?.email ||
+          "N/A",
         milestone: item.milestone?.name || "N/A",
         amount: item.amount ?? 0,
         currency: item.currency || "NGN",
@@ -127,14 +141,6 @@ export default function PaymentInstructions() {
     [router],
   );
 
-  if (error) {
-    return (
-      <div className="text-red-500 text-center p-4">
-        Error loading payment instructions: {(error as Error).message}
-      </div>
-    );
-  }
-
   return (
     <div className="bg-gray-50 mb-4">
       <div>
@@ -160,6 +166,10 @@ export default function PaymentInstructions() {
           totalCount={totalCount}
           currentPage={page}
           onPageChange={(newPage) => setPage(newPage)}
+          onSearchChange={(term) => {
+            setSearch(term);
+            setPage(1);
+          }}
           onRowsPerPageChange={(newLimit) => {
             setLimit(newLimit);
             setPage(1);

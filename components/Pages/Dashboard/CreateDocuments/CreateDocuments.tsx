@@ -4,6 +4,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import DashboardLayout from '../DashboardLayout/DashboardLayout';
 import { URLS } from '@/libs/constants/pageurl';
 import BackButton from '@/components/ui/BackButton';
+import { Spinner } from '@/components/ui/Custom/LoadingState';
 import Button from '@/components/ui/Button/Button';
 import { useProjects } from '@/libs/hooks/useProjects';
 import { UserDetailsProps } from '../UserDetails/UserDetails';
@@ -174,7 +175,7 @@ export default function CreateDocuments({ id }: UserDetailsProps) {
             {/* Upload Progress */}
             {uploading && (
               <div className="flex items-center space-x-2 text-sm text-blue-600">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <Spinner className="h-4 w-4" />
                 <span>Uploading documents...</span>
               </div>
             )}

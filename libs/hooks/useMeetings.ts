@@ -14,7 +14,7 @@ const { toast } = useToast();
  
 const getMeetingsQuery = ( params: object) => {
   return useQuery({
-    queryKey: ['projectquery',  params], 
+    queryKey: ['meetings',  params], 
     queryFn: () => MeetingService.getMeetings(params),
   });
 };

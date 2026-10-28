@@ -25,12 +25,12 @@ getAllProjects: (params :any): Promise<PaginatedResponse<User>> =>
     axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/`, { params }),   
 getSingleProject: (id: any): Promise<User> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/${id}`),
-getMilestones: (id: any,): Promise<User> => 
-    axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/milestones/${id}/milestones`),
-getDocuments: (id: any,): Promise<User> => 
-    axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/documents/${id}/documents`),
-getMeetings: (id: any,): Promise<User> => 
-    axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/meetings/${id}/meetings`),
+getMilestones: (id: any, params?: any) => 
+    axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/milestones/${id}/milestones`, { params }),
+getDocuments: (id: any, params?: any) => 
+    axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/documents/${id}/documents`, { params }),
+getMeetings: (id: any, params?: any) => 
+    axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/meetings/${id}/meetings`, { params }),
 getMilestonesDetails: (id: any, mileStoneId: any): Promise<User> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/milestones/${id}/milestones/${mileStoneId}`),
 createMilestones: (data: { projectId: string; milestoneData: any }): Promise<any> => 

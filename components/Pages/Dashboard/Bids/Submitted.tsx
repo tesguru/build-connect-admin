@@ -27,7 +27,7 @@ const COLUMNS = [
     render: (row: any) => (
       <span className="font-medium">
         {row.bidAmount !== null && row.bidAmount !== undefined
-          ? `$${Number(row.bidAmount).toLocaleString()}`
+          ? `₦${Number(row.bidAmount).toLocaleString()}`
           : "N/A"}
       </span>
     ),
@@ -78,13 +78,18 @@ export default function SubmittedBids() {
   const router = useRouter();
   const [page, setPage]   = useState(1);
   const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
 
   const { submittedQuery } = useBid();
-  const { data, isLoading, error } = submittedQuery({ page, limit });
+  const { data, isLoading } = submittedQuery({
+    page,
+    limit,
+    search: search || undefined,
+  });
 
   // API shape: { data: [...], meta: { totalDocuments } }
   const rawData    = data?.data?.data  || [];
-  const totalCount: number = data?.data?.meta?.totalDocuments ?? 0;
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? rawData.length;
 
   const tableData = useMemo(
     () =>
@@ -112,14 +117,6 @@ export default function SubmittedBids() {
     [router],
   );
 
-  if (error) {
-    return (
-      <div className="text-red-500 text-center p-4">
-        Error loading submitted bids: {(error as Error).message}
-      </div>
-    );
-  }
-
   return (
     <div className="bg-gray-50">
       <div>
@@ -146,6 +143,10 @@ export default function SubmittedBids() {
           totalCount={totalCount}
           currentPage={page}
           onPageChange={(newPage) => setPage(newPage)}
+          onSearchChange={(term) => {
+            setSearch(term);
+            setPage(1);
+          }}
           onRowsPerPageChange={(newLimit) => {
             setLimit(newLimit);
             setPage(1);

@@ -7,15 +7,19 @@ import { UserDetailsProps } from '../../UserDetails/UserDetails';
 
 const Documents = ({ id }: UserDetailsProps) => {
   const router = useRouter();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
 
   const { documentsQuery } = useUsers();
-  const { data, isLoading, error } = documentsQuery(id, { 
-    page: 1, 
-    limit: 100,
-  });   
+  const { data, isLoading, error } = documentsQuery(id, {
+    page,
+    limit,
+    search: search || undefined,
+  });
   
   const documents = data?.data?.data || [];
-  console.log('Documents data:', documents);
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? documents.length;
 
   const tableData = documents.map((doc: any) => ({
     id: doc.id,
@@ -66,6 +70,20 @@ const Documents = ({ id }: UserDetailsProps) => {
         searchPlaceholder="Search documents..."
         searchableColumns={['type', 'status']}
         isLoading={isLoading}
+        rowsPerPageOptions={[5, 8, 10, 20]}
+        defaultRowsPerPage={limit}
+        serverSide={true}
+        totalCount={totalCount}
+        currentPage={page}
+        onPageChange={(newPage) => setPage(newPage)}
+        onSearchChange={(term) => {
+          setSearch(term);
+          setPage(1);
+        }}
+        onRowsPerPageChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
       />
     </>
   );

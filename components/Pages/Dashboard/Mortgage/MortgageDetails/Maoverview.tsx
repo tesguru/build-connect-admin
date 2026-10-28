@@ -1,3 +1,5 @@
+import { formatName } from '@/libs/utils/helpers'
+
 const MAOverview = ({ application }: any) => {
   const fmt = (val: number | undefined) =>
     val !== undefined ? `₦${Number(val).toLocaleString()}` : 'N/A'
@@ -22,7 +24,7 @@ const MAOverview = ({ application }: any) => {
           <ul className="space-y-2">
             <li className="text-gray-700">
               <span className="font-medium">Name: </span>
-              {application?.firstName} {application?.lastName}
+              {formatName(application?.firstName, application?.lastName) || 'N/A'}
             </li>
             <li className="text-gray-700">
               <span className="font-medium">Email: </span>

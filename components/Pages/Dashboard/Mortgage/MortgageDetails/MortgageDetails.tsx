@@ -1,4 +1,6 @@
-import { User, Home, Briefcase, DollarSign, RefreshCw, Gavel } from 'lucide-react'
+import { User, Home, Briefcase, RefreshCw, Gavel } from 'lucide-react'
+import { NairaIcon } from '@/components/ui/Custom/NairaIcon'
+import { PageLoader, Spinner } from '@/components/ui/Custom/LoadingState'
 import { URLS } from '@/libs/constants/pageurl'
 import BackButton from '@/components/ui/BackButton'
 import { InfoGrid, InfoItem } from '@/components/ui/Custom/Infogrid'
@@ -106,7 +108,7 @@ const UpdateModal = ({
         >
           {isPending ? (
             <>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent" />
+              <Spinner className="h-4 w-4" />
               Updating...
             </>
           ) : 'Update'}
@@ -138,12 +140,7 @@ const MortgageDetails = ({ id }: MortgageDetailsProps) => {
       <DashboardLayout urlpath={URLS.DASHBOARD.MORTGAGE}>
         <div className="bg-gray-50 min-h-screen p-4">
           <BackButton label="Back" />
-          <div className="mt-4 flex justify-center items-center h-64">
-            <div className="text-center">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent" />
-              <p className="mt-4 text-gray-600">Loading application...</p>
-            </div>
-          </div>
+          <PageLoader label="Loading application..." />
         </div>
       </DashboardLayout>
     )
@@ -155,8 +152,8 @@ const MortgageDetails = ({ id }: MortgageDetailsProps) => {
       <DashboardLayout urlpath={URLS.DASHBOARD.MORTGAGE}>
         <div className="bg-gray-50 min-h-screen p-4">
           <BackButton label="Back" />
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-red-600">Error loading application. Please try again.</p>
+          <div className="mt-4 p-8 text-center text-sm text-gray-500">
+            No data available
           </div>
         </div>
       </DashboardLayout>
@@ -198,7 +195,7 @@ const MortgageDetails = ({ id }: MortgageDetailsProps) => {
       value: application.employmentStatus?.label ?? 'N/A',
     },
     {
-      icon: DollarSign,
+      icon: NairaIcon,
       label: 'Annual Income',
       value: application.annualGrossIncome
         ? `₦${Number(application.annualGrossIncome).toLocaleString()}`

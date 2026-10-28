@@ -1,27 +1,52 @@
 import { DataTable } from "@/components/ui/Datatable";
 import { Edit, Eye, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useDashboard } from "@/libs/hooks/useDashboard";
+
+const MOCK_ACTIVITIES = [
+  { id: 1, type: 'Verification', activity: 'Builder verification completed', detail: 'ABC Construction has been verified', status: 'Review', date: '17/01/2025' },
+  { id: 2, type: 'Project', activity: 'New project milestone', detail: 'Roofing milestone pending for Villa Grande', status: 'Review', date: '17/01/2025' },
+  { id: 3, type: 'Dispute', activity: 'Dispute raised', detail: 'Payment dispute for Project Sunny Heights', status: 'Review', date: '17/01/2025' },
+  { id: 4, type: 'Project', activity: 'New project milestone', detail: 'Foundation milestone completed for Villa Grande', status: 'Review', date: '17/01/2025' },
+  { id: 5, type: 'Dispute', activity: 'Dispute raised', detail: 'Payment dispute for Project Sunny Heights', status: 'Review', date: '17/01/2025' },
+  { id: 6, type: 'Verification', activity: 'Builder verification', detail: 'ABC Construction verification is under review', status: 'Review', date: '17/01/2025' },
+  { id: 7, type: 'Bid', activity: 'New bid submitted', detail: 'Express Builders submitted bid for Ocean View', status: 'Review', date: '17/01/2025' },
+  { id: 8, type: 'Verification', activity: 'Builder verification completed', detail: 'ABC Construction has been verified', status: 'Review', date: '17/01/2025' },
+  { id: 9, type: 'Project', activity: 'New project milestone', detail: 'Electrical work completed for Villa Grande', status: 'Completed', date: '16/01/2025' },
+  { id: 10, type: 'Verification', activity: 'Builder verification completed', detail: 'XYZ Builders has been verified', status: 'Completed', date: '16/01/2025' },
+  { id: 11, type: 'Project', activity: 'New project milestone', detail: 'Plumbing milestone for Ocean View', status: 'Pending', date: '18/01/2025' },
+  { id: 12, type: 'Bid', activity: 'New bid submitted', detail: 'Quality Builders submitted bid for Sunset Plaza', status: 'Pending', date: '18/01/2025' },
+  { id: 13, type: 'Verification', activity: 'Builder verification', detail: 'Prime Construction verification pending', status: 'Pending', date: '18/01/2025' },
+  { id: 14, type: 'Project', activity: 'New project milestone', detail: 'Painting work for Villa Grande', status: 'Completed', date: '15/01/2025' },
+  { id: 15, type: 'Dispute', activity: 'Dispute resolved', detail: 'Payment dispute resolved for Ocean View', status: 'Completed', date: '15/01/2025' },
+];
 
 export default function RecentActivity() {
   const [activeTab, setActiveTab] = useState('Review');
 
-  const allActivities = [
-    { id: 1, type: 'Verification', activity: 'Builder verification completed', detail: 'ABC Construction has been verified', status: 'Review', date: '17/01/2025' },
-    { id: 2, type: 'Project', activity: 'New project milestone', detail: 'Roofing milestone pending for Villa Grande', status: 'Review', date: '17/01/2025' },
-    { id: 3, type: 'Dispute', activity: 'Dispute raised', detail: 'Payment dispute for Project Sunny Heights', status: 'Review', date: '17/01/2025' },
-    { id: 4, type: 'Project', activity: 'New project milestone', detail: 'Foundation milestone completed for Villa Grande', status: 'Review', date: '17/01/2025' },
-    { id: 5, type: 'Dispute', activity: 'Dispute raised', detail: 'Payment dispute for Project Sunny Heights', status: 'Review', date: '17/01/2025' },
-    { id: 6, type: 'Verification', activity: 'Builder verification', detail: 'ABC Construction verification is under review', status: 'Review', date: '17/01/2025' },
-    { id: 7, type: 'Bid', activity: 'New bid submitted', detail: 'Express Builders submitted bid for Ocean View', status: 'Review', date: '17/01/2025' },
-    { id: 8, type: 'Verification', activity: 'Builder verification completed', detail: 'ABC Construction has been verified', status: 'Review', date: '17/01/2025' },
-    { id: 9, type: 'Project', activity: 'New project milestone', detail: 'Electrical work completed for Villa Grande', status: 'Completed', date: '16/01/2025' },
-    { id: 10, type: 'Verification', activity: 'Builder verification completed', detail: 'XYZ Builders has been verified', status: 'Completed', date: '16/01/2025' },
-    { id: 11, type: 'Project', activity: 'New project milestone', detail: 'Plumbing milestone for Ocean View', status: 'Pending', date: '18/01/2025' },
-    { id: 12, type: 'Bid', activity: 'New bid submitted', detail: 'Quality Builders submitted bid for Sunset Plaza', status: 'Pending', date: '18/01/2025' },
-    { id: 13, type: 'Verification', activity: 'Builder verification', detail: 'Prime Construction verification pending', status: 'Pending', date: '18/01/2025' },
-    { id: 14, type: 'Project', activity: 'New project milestone', detail: 'Painting work for Villa Grande', status: 'Completed', date: '15/01/2025' },
-    { id: 15, type: 'Dispute', activity: 'Dispute resolved', detail: 'Payment dispute resolved for Ocean View', status: 'Completed', date: '15/01/2025' },
-  ];
+  const { getRecentActivity } = useDashboard();
+  const { data, isLoading } = getRecentActivity();
+
+  const apiActivities = data?.data?.data || [];
+
+  const allActivities = useMemo(() => {
+    if (!Array.isArray(apiActivities) || apiActivities.length === 0) {
+      return MOCK_ACTIVITIES;
+    }
+    return apiActivities.map((item: any, index: number) => ({
+      id: item.id ?? index + 1,
+      type: item.type ?? '—',
+      activity: item.activity ?? item.title ?? '—',
+      detail: item.detail ?? item.description ?? '—',
+      status: item.status ?? 'Review',
+      date: item.date
+        ? item.date
+        : item.createdAt
+        ? new Date(item.createdAt).toLocaleDateString()
+        : '—',
+    }));
+  }, [apiActivities]);
+
 
   const tabs = [
     { name: 'All Activities', count: allActivities.length },
@@ -109,6 +134,7 @@ export default function RecentActivity() {
           rowsPerPageOptions={[5, 8, 10, 20]}
           defaultRowsPerPage={8}
           showSerialNumber={true}
+          isLoading={isLoading}
         />
       </div>
     </div>

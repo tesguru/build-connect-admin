@@ -1,17 +1,44 @@
+"use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { User, LogOut } from 'lucide-react';
-import { AvatarImage } from '@/libs/constants/image';
 import Image from 'next/image';
+import { AvatarImage } from '@/libs/constants/image';
+import { useAuthStore } from '@/libs/store/Authstore';
+import { useAuth } from '@/libs/hooks/useAuth';
+import { formatName } from '@/libs/utils/helpers';
 
 export default function UserProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const { users, loadAuthData } = useAuthStore();
+  const { logout } = useAuth();
+
+  useEffect(() => {
+    if (!users) loadAuthData();
+  }, [users, loadAuthData]);
+
+  const displayName = users ? formatName(users.firstName, users.lastName) : '';
+
+  const handleManageAccount = () => {
+    setIsOpen(false);
+    router.push('/settings?tab=adminaccounts');
+  };
+
+  const handleLogout = () => {
+    setIsOpen(false);
+    logout();
+  };
 
   return (
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-10 h-10 rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-transparent hover:ring-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-label="Account menu"
       >
         <Image
           src={AvatarImage}
@@ -24,64 +51,51 @@ export default function UserProfileDropdown() {
           <div
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
+            aria-hidden="true"
           />
 
-          <div className="absolute w-[480px] right-0 mt-6 w-96 bg-white rounded-2xl border border-gray-200 z-20 p-6">
-       
-            <div className="flex flex-col items-center mb-6">
-              <div className="w-24 h-24 rounded-full  overflow-hidden mb-3 border-4 border-blue-500">
+          <div
+            role="menu"
+            className="absolute right-0 mt-3 w-[360px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-gray-200 shadow-xl z-20 overflow-hidden"
+          >
+            <div className="px-6 pt-6 pb-5 flex flex-col items-center border-b border-gray-100">
+              <div className="w-20 h-20 rounded-full overflow-hidden mb-3 ring-4 ring-blue-50">
                 <Image
                   src={AvatarImage}
                   alt="User Avatar"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-800">Hi, Lorem Ipsum!</h3>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900 text-center">
+                {displayName ? `Hi, ${displayName}!` : 'Hi there!'}
+              </h3>
+              {users?.email && (
+                <p className="text-sm text-gray-500 mt-1 truncate max-w-full">{users.email}</p>
+              )}
             </div>
 
-      
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <button className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-xl py-3 px-4 transition-colors">
-                <User size={20} className="text-gray-700" />
-                <span className="text-gray-700 font-medium">Manage Account</span>
+            <div className="grid grid-cols-2 gap-2 p-4">
+              <button
+                onClick={handleManageAccount}
+                className="flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl py-3 px-4 transition-colors"
+              >
+                <User size={18} className="text-gray-700" />
+                <span className="text-sm text-gray-700 font-medium">Manage Account</span>
               </button>
-              <button className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-xl py-3 px-4 transition-colors">
-                <LogOut size={20} className="text-gray-700" />
-                <span className="text-gray-700 font-medium">Log Out</span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-2 bg-gray-50 hover:bg-red-50 border border-gray-200 hover:border-red-200 rounded-xl py-3 px-4 transition-colors group"
+              >
+                <LogOut size={18} className="text-gray-700 group-hover:text-red-600" />
+                <span className="text-sm text-gray-700 group-hover:text-red-600 font-medium">
+                  Log Out
+                </span>
               </button>
             </div>
 
-            <div className="space-y-3 text-center text-sm text-gray-600">
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                <a href="#" className="hover:text-gray-800">Company</a>
-                <span>•</span>
-                <a href="#" className="hover:text-gray-800">About</a>
-                <span>•</span>
-                <a href="#" className="hover:text-gray-800">Contact</a>
-                <span>•</span>
-                <a href="#" className="hover:text-gray-800">Help</a>
-                <span>•</span>
-                <a href="#" className="hover:text-gray-800">Safety</a>
-                <span>•</span>
-                <a href="#" className="hover:text-gray-800">Privacy Center</a>
-              </div>
-              <div className="flex items-center justify-center gap-2 flex-wrap">
-                <a href="#" className="hover:text-gray-800">Terms & Policies</a>
-                <span>•</span>
-                <a href="#" className="hover:text-gray-800">Community Guidelines</a>
-                <span>•</span>
-                <a href="#" className="hover:text-gray-800">Privacy Policy</a>
-                <span>•</span>
-                <a href="#" className="hover:text-gray-800">Terms Of Service</a>
-                <span>•</span>
-                <a href="#" className="hover:text-gray-800">Legal disclaimer</a>
-              </div>
-              <div className="pt-3 text-gray-500">
-                © 2025 BUILDCONNECT
-              </div>
-            </div>
+            <p className="px-6 pb-5 text-center text-xs text-gray-400">
+              © 2026 BUILDCONNECT
+            </p>
           </div>
         </>
       )}

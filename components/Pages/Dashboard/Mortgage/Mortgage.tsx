@@ -103,9 +103,14 @@ export default function MortgageApplications() {
   const router = useRouter()
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(8)
+  const [search, setSearch] = useState('')
 
   const { getMortgageQuery } = useMortgage()
-  const { data, isLoading, error } = getMortgageQuery({ page, limit })
+  const { data, isLoading } = getMortgageQuery({
+    page,
+    limit,
+    search: search || undefined,
+  })
 
   const rawData = data?.data?.data || []
   const totalCount: number = data?.data?.meta?.totalDocuments ?? rawData.length
@@ -143,16 +148,6 @@ export default function MortgageApplications() {
     [router],
   )
 
-  if (error) {
-    return (
-      <DashboardLayout urlpath={URLS.DASHBOARD.MORTGAGE}>
-        <div className="text-red-500 text-center p-4">
-          Error loading mortgage applications: {(error as Error).message}
-        </div>
-      </DashboardLayout>
-    )
-  }
-
   return (
     <DashboardLayout urlpath={URLS.DASHBOARD.MORTGAGE}>
       <div className="bg-gray-50 mb-4">
@@ -179,6 +174,10 @@ export default function MortgageApplications() {
             totalCount={totalCount}
             currentPage={page}
             onPageChange={(newPage) => setPage(newPage)}
+            onSearchChange={(term) => {
+              setSearch(term)
+              setPage(1)
+            }}
             onRowsPerPageChange={(newLimit) => {
               setLimit(newLimit)
               setPage(1)

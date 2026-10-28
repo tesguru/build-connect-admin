@@ -1,4 +1,4 @@
-import { User, DollarSign, Hash, FileText, RefreshCw } from "lucide-react";
+import { User, Hash, FileText, RefreshCw } from "lucide-react";
 import { URLS } from "@/libs/constants/pageurl";
 import BackButton from "@/components/ui/BackButton";
 import { InfoGrid, InfoItem } from "@/components/ui/Custom/Infogrid";
@@ -6,6 +6,9 @@ import { useEscrow } from "@/libs/hooks/useEscrow";
 import WFOtherdetails from "./Wfotherdetails";
 import DashboardLayout from "../../DashboardLayout/DashboardLayout";
 import { useState } from "react";
+import { formatName } from "@/libs/utils/helpers";
+import { NairaIcon } from "@/components/ui/Custom/NairaIcon";
+import { PageLoader, Spinner } from "@/components/ui/Custom/LoadingState";
 
 interface WalletFundingDetailsProps {
   id: string;
@@ -48,12 +51,7 @@ const WalletFundingDetails = ({ id }: WalletFundingDetailsProps) => {
         <div className="bg-gray-50 min-h-screen">
           <div className="p-4">
             <BackButton label="Back" />
-            <div className="mt-4 p-4 flex justify-center items-center h-64">
-              <div className="text-center">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent" />
-                <p className="mt-4 text-gray-600">Loading wallet funding...</p>
-              </div>
-            </div>
+            <PageLoader label="Loading wallet funding..." />
           </div>
         </div>
       </DashboardLayout>
@@ -68,8 +66,8 @@ const WalletFundingDetails = ({ id }: WalletFundingDetailsProps) => {
     statusStyles[funding.status] ?? "bg-gray-100 text-gray-700";
 
   const clientName =
-    funding.client?.name ||
-    `${funding.client?.firstName ?? ""} ${funding.client?.lastName ?? ""}`.trim() ||
+    formatName(funding.client?.name) ||
+    formatName(funding.client?.firstName, funding.client?.lastName) ||
     "Not specified";
 
   const infoItems: InfoItem[] = [
@@ -79,7 +77,7 @@ const WalletFundingDetails = ({ id }: WalletFundingDetailsProps) => {
       value: clientName,
     },
     {
-      icon: DollarSign,
+      icon: NairaIcon,
       label: "Amount",
       value: funding.amount
         ? `${funding.currency ?? "NGN"} ${Number(funding.amount).toLocaleString()}`
@@ -241,7 +239,7 @@ const WalletFundingDetails = ({ id }: WalletFundingDetailsProps) => {
               >
                 {updateWalletFunding.isPending ? (
                   <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent" />
+                    <Spinner className="h-4 w-4" />
                     Updating...
                   </>
                 ) : (

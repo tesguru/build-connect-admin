@@ -1,4 +1,5 @@
 import ActionButton from '@/components/ui/Button/ActionButton';
+import { SectionLoader } from '@/components/ui/Custom/LoadingState';
 import { DataTable } from '@/components/ui/Datatable';
 import { useProjects } from '@/libs/hooks/useProjects';
 import { PlusIcon, ArrowLeft, RefreshCw } from 'lucide-react';
@@ -8,6 +9,9 @@ import MileStoneDetails from './MileStoneDetails';
 const Milestones = ({ project }: any) => {
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
   const [shouldRefetch, setShouldRefetch] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
 
   const { getMilestoneQuery } = useProjects();
   const { 
@@ -15,7 +19,11 @@ const Milestones = ({ project }: any) => {
     isLoading: isMilestonesLoading, 
     error, 
     refetch 
-  } = getMilestoneQuery(project?.id);
+  } = getMilestoneQuery(project?.id, {
+    page,
+    limit,
+    search: search || undefined,
+  });
   
 
   useEffect(() => {
@@ -26,6 +34,7 @@ const Milestones = ({ project }: any) => {
   }, [selectedMilestoneId, shouldRefetch, refetch]);
 
   const milestones = Array.isArray(data?.data?.data) ? data?.data?.data : [];
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? milestones.length;
 
   const handleViewMilestone = (row: any) => {
     setSelectedMilestoneId(row.id);
@@ -60,7 +69,7 @@ const Milestones = ({ project }: any) => {
     {
       key: 'status',
       header: 'Status',
-      cell: (row: any) => (
+      render: (row: any) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium ${
             row.status === 'completed'
@@ -95,17 +104,15 @@ const Milestones = ({ project }: any) => {
   // Add loading state for milestones LIST only
   if (isMilestonesLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
+      <SectionLoader label="Loading milestones..." />
     );
   }
 
   // Add error state for milestones LIST only
   if (error) {
     return (
-      <div className="text-red-500 text-center p-4">
-        Error loading milestones: {error.message}
+      <div className="text-center p-8 text-sm text-gray-500">
+        No data available
         <button
           onClick={handleManualRefresh}
           className="ml-2 text-blue-600 hover:text-blue-800"
@@ -126,14 +133,14 @@ const Milestones = ({ project }: any) => {
           ? new Date(milestone.completionDate).toLocaleDateString()
           : 'Not set',
         amount: milestone.amount
-          ? `$${milestone.amount.toLocaleString()}`
-          : '$0',
+          ? `₦${milestone.amount.toLocaleString()}`
+          : '₦0',
         status: milestone.status,
       }))
     : [];
 
   // Show empty state if no milestones
-  if (tableData.length === 0) {
+  if (totalCount === 0 && !search) {
     return (
       <>
         <div className="flex justify-between items-center mb-6">
@@ -186,9 +193,25 @@ const Milestones = ({ project }: any) => {
         columns={columns}
         data={tableData}
         actions={actions}
+        showSearch={true}
         searchPlaceholder="Search milestones..."
         searchableColumns={['name', 'description', 'status']}
         isLoading={isMilestonesLoading}
+        emptyMessage="No milestones found"
+        rowsPerPageOptions={[5, 8, 10, 20]}
+        defaultRowsPerPage={limit}
+        serverSide={true}
+        totalCount={totalCount}
+        currentPage={page}
+        onPageChange={(newPage) => setPage(newPage)}
+        onSearchChange={(term) => {
+          setSearch(term);
+          setPage(1);
+        }}
+        onRowsPerPageChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
       />
     </>
   );

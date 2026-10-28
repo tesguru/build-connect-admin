@@ -1,8 +1,10 @@
 import MetricsCard from "@/components/ui/Custom/MetricsCard";
+import { SectionLoader } from "@/components/ui/Custom/LoadingState";
 import { DataTable } from "@/components/ui/Datatable";
 import { useUsers } from "@/libs/hooks/useUsers";
 import { UserDetailsProps } from "../UserDetails";
 import { FileText, Calendar, Activity as ActivityIcon } from "lucide-react";
+import { useState } from "react";
 
 interface ActivityItem {
   type: string;
@@ -13,15 +15,18 @@ interface ActivityItem {
 
 export default function Activity({ id }: UserDetailsProps) {
   const { activityQuery } = useUsers();
-  console.log(id)
-  const { data, isLoading, error } = activityQuery(id, { 
-    page: 1, 
-    limit: 100,
-    id: id
-  }); 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
 
- 
-  const activitiesData = data?.data.data || [];
+  const { data, isLoading } = activityQuery(id, {
+    page,
+    limit,
+    search: search || undefined,
+  });
+
+  const activitiesData = data?.data?.data || [];
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? activitiesData.length;
   const hasActivities = activitiesData.length > 0;
 
   const recentActivities = activitiesData.map((activity: ActivityItem, index: number) => ({
@@ -92,20 +97,7 @@ export default function Activity({ id }: UserDetailsProps) {
     return (
       <div className="bg-gray-50 p-6">
         <p className="text-2xl font-bold mb-4">Recent Activity</p>
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-gray-50 p-6">
-        <p className="text-2xl font-bold mb-4">Recent Activity</p>
-        <div className="text-red-500 text-center p-4">
-          Error loading activities: {error.message}
-        </div>
+        <SectionLoader label="Loading activity..." />
       </div>
     );
   }
@@ -134,17 +126,30 @@ export default function Activity({ id }: UserDetailsProps) {
       )} */}
 
       <div className="max-w-7xl mx-auto">
-        {hasActivities ? (
+        {hasActivities || search ? (
           <DataTable
             columns={columns}
             data={recentActivities}
             rowsPerPageOptions={[5, 8, 10, 20]}
-            defaultRowsPerPage={8}
+            defaultRowsPerPage={limit}
+            showSearch={true}
             searchPlaceholder="Search activities..."
             searchableColumns={["activityTitle", "description"]}
             showSerialNumber={true}
             isLoading={isLoading}
             emptyMessage="No activities found"
+            serverSide={true}
+            totalCount={totalCount}
+            currentPage={page}
+            onPageChange={(newPage) => setPage(newPage)}
+            onSearchChange={(term) => {
+              setSearch(term);
+              setPage(1);
+            }}
+            onRowsPerPageChange={(newLimit) => {
+              setLimit(newLimit);
+              setPage(1);
+            }}
           />
         ) : (
           // Enhanced empty state

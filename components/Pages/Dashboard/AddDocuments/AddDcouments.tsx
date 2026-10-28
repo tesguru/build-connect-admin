@@ -247,10 +247,10 @@ export default function AddDocuments() {
 
             <Button
               type="submit"
-              disabled={isLoading}
+              loading={isLoading}
               className="text-white bg-primary-02 hover:bg-primary min-w-[100px]"
             >
-              {isLoading ? "Uploading..." : "Submit"}
+              Submit
             </Button>
           </div>
 

@@ -3,6 +3,20 @@ import { Eye, Paperclip } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSupport } from "@/libs/hooks/useSupport";
+import { formatStatus } from "@/libs/utils/helpers";
+
+const STATUS_OPTIONS = [
+  { value: "open", label: "Open" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "resolved", label: "Resolved" },
+  { value: "closed", label: "Closed" },
+];
+
+const PRIORITY_OPTIONS = [
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+];
 
 const COLUMNS = [
   {
@@ -41,7 +55,7 @@ const COLUMNS = [
             : "bg-blue-50 text-blue-600" // low
         }`}
       >
-        {row.priority?.charAt(0).toUpperCase() + row.priority?.slice(1)}
+        {formatStatus(row.priority) || "N/A"}
       </span>
     ),
   },
@@ -60,9 +74,7 @@ const COLUMNS = [
             : "bg-yellow-50 text-yellow-600" // open
         }`}
       >
-        {row.status === "in_progress"
-          ? "In Progress"
-          : row.status?.charAt(0).toUpperCase() + row.status?.slice(1)}
+        {formatStatus(row.status) || "N/A"}
       </span>
     ),
   },
@@ -91,12 +103,21 @@ export default function TicketsTable() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('');
 
   const { getTicketsQuery } = useSupport();
-  const { data, isLoading, error } = getTicketsQuery({ page, limit });
+  const { data, isLoading } = getTicketsQuery({
+    page,
+    limit,
+    search: search || undefined,
+    status: statusFilter || undefined,
+    priority: priorityFilter || undefined,
+  });
 
   const rawData    = data?.data?.data || [];
-  const totalCount: number = data?.data?.meta?.totalDocuments ?? 0;
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? rawData.length;
 
   const tableData = useMemo(
     () =>
@@ -140,6 +161,15 @@ export default function TicketsTable() {
         showSearch={true}
         searchPlaceholder="Search tickets..."
         searchableColumns={["ticketNumber", "subject", "projectName", "status", "priority"]}
+        filters={[
+          { key: "status", label: "Status", options: STATUS_OPTIONS },
+          { key: "priority", label: "Priority", options: PRIORITY_OPTIONS },
+        ]}
+        onFilterChange={(values) => {
+          setStatusFilter(values.status && values.status !== "all" ? values.status : "");
+          setPriorityFilter(values.priority && values.priority !== "all" ? values.priority : "");
+          setPage(1);
+        }}
         showSerialNumber={true}
         isLoading={isLoading}
         // ── Server-side pagination ──────────────────────────────────────
@@ -147,6 +177,10 @@ export default function TicketsTable() {
         totalCount={totalCount}
         currentPage={page}
         onPageChange={(newPage) => setPage(newPage)}
+        onSearchChange={(term) => {
+          setSearch(term);
+          setPage(1);
+        }}
         onRowsPerPageChange={(newLimit) => {
           setLimit(newLimit);
           setPage(1);

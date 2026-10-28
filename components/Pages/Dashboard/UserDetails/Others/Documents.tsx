@@ -1,8 +1,10 @@
 import { DataTable } from "@/components/ui/Datatable";
+import { SectionLoader } from "@/components/ui/Custom/LoadingState";
 import { useUsers } from "@/libs/hooks/useUsers";
 import { Eye, Download } from "lucide-react";
 import MetricsCard from "@/components/ui/Custom/MetricsCard";
 import { FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { useState } from "react";
 
 interface DocumentsProps {
   id: string;
@@ -19,10 +21,15 @@ interface Document {
 
 export default function Documents({ id }: DocumentsProps) {
   const { documentsQuery } = useUsers();
-  const { data, isLoading, error } = documentsQuery(id, { 
-    page: 1, 
-    limit: 100
-  }); 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
+
+  const { data, isLoading } = documentsQuery(id, {
+    page,
+    limit,
+    search: search || undefined,
+  });
 
   // Transform API data to match your table columns
   const clientDocuments = data?.data?.data?.map((document: Document) => ({
@@ -53,7 +60,7 @@ export default function Documents({ id }: DocumentsProps) {
   }
 
   // Calculate metrics from the data
-  const totalDocuments = data?.data?.meta?.totalDocuments || 0;
+  const totalDocuments = data?.data?.meta?.totalDocuments || clientDocuments.length;
   const verifiedDocuments = clientDocuments.filter((doc: any) => doc.status === 'Verified').length;
   const pendingDocuments = clientDocuments.filter((doc: any) => doc.status === 'Pending').length;
   const rejectedDocuments = clientDocuments.filter((doc: any) => doc.status === 'Rejected').length;
@@ -127,20 +134,7 @@ export default function Documents({ id }: DocumentsProps) {
     return (
       <div className="bg-gray-50 p-6">
         <p className="text-2xl font-bold mb-4">Client Documents</p>
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-gray-50 p-6">
-        <p className="text-2xl font-bold mb-4">Client Documents</p>
-        <div className="text-red-500 text-center p-4">
-          Error loading documents: {error.message}
-        </div>
+        <SectionLoader label="Loading documents..." />
       </div>
     );
   }
@@ -161,12 +155,25 @@ export default function Documents({ id }: DocumentsProps) {
           data={clientDocuments}
           actions={actions}
           rowsPerPageOptions={[5, 8, 10, 20]}
-          defaultRowsPerPage={8}
+          defaultRowsPerPage={limit}
+          showSearch={true}
           searchPlaceholder="Search documents..."
           searchableColumns={["documentName", "type"]}
           showSerialNumber={true}
           isLoading={isLoading}
           emptyMessage="No documents found"
+          serverSide={true}
+          totalCount={totalDocuments}
+          currentPage={page}
+          onPageChange={(newPage) => setPage(newPage)}
+          onSearchChange={(term) => {
+            setSearch(term);
+            setPage(1);
+          }}
+          onRowsPerPageChange={(newLimit) => {
+            setLimit(newLimit);
+            setPage(1);
+          }}
         />
       </div>
     </div>

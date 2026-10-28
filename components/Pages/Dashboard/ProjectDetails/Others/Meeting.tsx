@@ -1,4 +1,5 @@
 import { DataTable } from "@/components/ui/Datatable";
+import { SectionLoader } from "@/components/ui/Custom/LoadingState";
 import { Calendar, Clock, Video, Phone, Users, AlertCircle, CheckCircle, PlusIcon } from "lucide-react";
 import { useProjects } from "@/libs/hooks/useProjects";
 import { useState } from "react";
@@ -6,10 +7,18 @@ import ActionButton from "@/components/ui/Button/ActionButton";
 
 export default function Meeting({ project }: any) {
   const [selectedMeeting, setSelectedMeeting] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8);
+  const [search, setSearch] = useState('');
   const { getMeetings } = useProjects(); 
-  const { data, isLoading, error } = getMeetings(project.id);
+  const { data, isLoading } = getMeetings(project.id, {
+    page,
+    limit,
+    search: search || undefined,
+  });
 
   const meetings = data?.data?.data || [];
+  const totalCount: number = data?.data?.meta?.totalDocuments ?? meetings.length;
 
   const formatDateTime = (dateString: string) => {
     if (!dateString) return 'Not scheduled';
@@ -183,29 +192,13 @@ export default function Meeting({ project }: any) {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Meetings</h1>
         </div>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2">Loading meetings...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Meetings</h1>
-        </div>
-        <div className="text-red-500 text-center p-4">
-          Error loading meetings: {error.message}
-        </div>
+        <SectionLoader label="Loading meetings..." />
       </div>
     );
   }
 
   // Empty state
-  if (meetings.length === 0) {
+  if (totalCount === 0 && !search) {
     return (
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
@@ -305,7 +298,7 @@ export default function Meeting({ project }: any) {
         <h1 className="text-2xl font-bold text-gray-900">Meetings</h1>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">
-            {meetings.length} meeting{meetings.length !== 1 ? 's' : ''}
+            {totalCount} meeting{totalCount !== 1 ? 's' : ''}
           </span>
     
         </div>
@@ -315,10 +308,26 @@ export default function Meeting({ project }: any) {
         columns={columns}
         data={meetings}
         actions={actions}
+        showSearch={true}
         searchPlaceholder="Search meetings..."
         searchableColumns={['title', 'meetingType', 'status']}
         showSerialNumber={true}
         isLoading={isLoading}
+        emptyMessage="No meetings scheduled"
+        rowsPerPageOptions={[5, 8, 10, 20]}
+        defaultRowsPerPage={limit}
+        serverSide={true}
+        totalCount={totalCount}
+        currentPage={page}
+        onPageChange={(newPage) => setPage(newPage)}
+        onSearchChange={(term) => {
+          setSearch(term);
+          setPage(1);
+        }}
+        onRowsPerPageChange={(newLimit) => {
+          setLimit(newLimit);
+          setPage(1);
+        }}
       />
 
       <MeetingDetailsModal />

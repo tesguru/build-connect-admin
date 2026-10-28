@@ -22,8 +22,8 @@ interface PaginatedResponse<T> {
 
 export const DocumentService = {
 
-   getDocuments: (data: any,): Promise<User> => 
-    axiosInstance.get(`${APIURLS.DASHBOARD.DOCUMENTS}/`),
-    createDocuments: (data: any,): Promise<User> => 
-    axiosInstance.get(`${APIURLS.DASHBOARD.DOCUMENTS}/`, data),
+   getDocuments: (params?: { page?: number; limit?: number; search?: string }) => 
+    axiosInstance.get(`${APIURLS.DASHBOARD.DOCUMENTS}/`, { params }),
+    createDocuments: (data: any) => 
+    axiosInstance.post(`${APIURLS.DASHBOARD.DOCUMENTS}/`, data),
 };

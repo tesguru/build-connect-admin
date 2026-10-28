@@ -41,5 +41,9 @@ getAllAccountDeletions: ( params: any): Promise<User> =>
     axiosInstance.get(`${APIURLS.DASHBOARD.DELETE_REQUESTS}`, {params}),
 deleteAccount: (id: any, data: any): Promise<User> => 
     axiosInstance.patch(`${APIURLS.DASHBOARD.DELETE_REQUESTS}/${id}/resolve`, data),
+createAdmin: (data: any): Promise<User> =>
+    axiosInstance.post(`${APIURLS.DASHBOARD.ADMIN}/`, data),
+  getAdmin: (params: any): Promise<User> =>
+    axiosInstance.get(`${APIURLS.DASHBOARD.ADMIN}/`, {params}),
 };
 
