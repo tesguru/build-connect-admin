@@ -1,21 +1,28 @@
 import { DataTable } from "@/components/ui/Datatable";
 import { useUsers } from "@/libs/hooks/useUsers";
-import { formatName } from "@/libs/utils/helpers";
-import { Plus, X } from "lucide-react";
+import { formatName, formatStatus } from "@/libs/utils/helpers";
+import { Eye, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createAdminSchema, createAdminInput } from "@/libs/schema/authschema";
+import {
+  createAdminSchema,
+  updateAdminSchema,
+  createAdminInput,
+  updateAdminInput,
+} from "@/libs/schema/authschema";
 import InputField from "@/components/ui/Forms/InputField";
-import Dropdown from "@/components/ui/Forms/Dropdown";
 import Button from "@/components/ui/Button/Button";
+import { PageLoader, Spinner } from "@/components/ui/Custom/LoadingState";
 
-const ROLE_OPTIONS = [
-  { value: "super_admin", label: "Super Admin" },
-  { value: "supervisor", label: "Supervisor" },
-  { value: "operations", label: "Operations" },
-  { value: "support", label: "Support" },
-];
+const roleStyles: Record<string, string> = {
+  super_admin: "bg-blue-100 text-blue-700",
+};
+
+const verificationStyles: Record<string, string> = {
+  verified: "bg-green-100 text-green-700",
+  not_required: "bg-gray-100 text-gray-700",
+};
 
 const COLUMNS = [
   {
@@ -41,35 +48,28 @@ const COLUMNS = [
   {
     key: "role",
     header: "Role",
-    render: (row: any) => {
-      const label = row.role
-        ?.replace(/_/g, " ")
-        .replace(/\b\w/g, (c: string) => c.toUpperCase());
-      return (
-        <span className="px-3 py-1 rounded-md text-sm font-medium bg-blue-100 text-blue-700">
-          {label || "N/A"}
-        </span>
-      );
-    },
+    render: (row: any) => (
+      <span
+        className={`px-3 py-1 rounded-md text-sm font-medium ${
+          roleStyles[row.role] ?? "bg-gray-100 text-gray-700"
+        }`}
+      >
+        {formatStatus(row.role) || "N/A"}
+      </span>
+    ),
   },
   {
     key: "status",
     header: "Status",
-    render: (row: any) => {
-      const statusStyles: Record<string, string> = {
-        verified: "bg-green-100 text-green-700",
-        not_required: "bg-gray-100 text-gray-700",
-      };
-      const style = statusStyles[row.verificationStatus] || "bg-gray-100 text-gray-700";
-      const label = row.verificationStatus
-        ?.replace(/_/g, " ")
-        .replace(/\b\w/g, (c: string) => c.toUpperCase());
-      return (
-        <span className={`px-3 py-1 rounded-md text-sm font-medium ${style}`}>
-          {label || "N/A"}
-        </span>
-      );
-    },
+    render: (row: any) => (
+      <span
+        className={`px-3 py-1 rounded-md text-sm font-medium ${
+          verificationStyles[row.verificationStatus] ?? "bg-gray-100 text-gray-700"
+        }`}
+      >
+        {formatStatus(row.verificationStatus) || "N/A"}
+      </span>
+    ),
   },
   {
     key: "createdAt",
@@ -82,21 +82,196 @@ const COLUMNS = [
   },
 ];
 
+const modalWrapper = "fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4";
+const modalCard =
+  "bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto";
+const modalClose = "absolute top-4 right-4 text-gray-400 hover:text-gray-600";
+
+function AdminViewModal({ id, onClose }: { id: string; onClose: () => void }) {
+  const { adminDetailQuery } = useUsers();
+  const { data, isLoading, error } = adminDetailQuery(id);
+  const admin = data?.data?.data;
+
+  const items = admin
+    ? [
+        { label: "Full Name", value: formatName(admin.firstName, admin.lastName) || admin.fullName },
+        { label: "Email", value: admin.email },
+        { label: "Phone", value: admin.phoneNumber },
+        { label: "Location", value: admin.location },
+        { label: "Role", value: formatStatus(admin.role) },
+        { label: "Status", value: formatStatus(admin.verificationStatus) },
+        { label: "Email Verified", value: admin.isEmailVerified ? "Yes" : "No" },
+        {
+          label: "Created On",
+          value: admin.createdAt ? new Date(admin.createdAt).toLocaleString('en-GB') : "N/A",
+        },
+        {
+          label: "Last Updated",
+          value: admin.updatedAt ? new Date(admin.updatedAt).toLocaleString('en-GB') : "N/A",
+        },
+      ]
+    : [];
+
+  return (
+    <div className={modalWrapper}>
+      <div className={modalCard}>
+        <button onClick={onClose} className={modalClose}>
+          <X className="w-5 h-5" />
+        </button>
+
+        <p className="text-lg font-bold mb-4">Admin Details</p>
+
+        {isLoading ? (
+          <PageLoader label="Loading admin..." className="py-8" />
+        ) : error || !admin ? (
+          <p className="py-8 text-center text-sm text-gray-500">No data available</p>
+        ) : (
+          <div className="space-y-3">
+            {items.map((item) => (
+              <div
+                key={item.label}
+                className="flex justify-between gap-4 border-b border-gray-100 pb-2"
+              >
+                <span className="text-sm text-gray-500">{item.label}</span>
+                <span className="text-sm font-medium text-gray-900 text-right break-words">
+                  {item.value || "N/A"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button
+          onClick={onClose}
+          className="mt-6 w-full rounded-md bg-gray-100 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AdminEditModal({ admin, onClose }: { admin: any; onClose: () => void }) {
+  const { updateAdminMutation } = useUsers();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<updateAdminInput>({
+    resolver: zodResolver(updateAdminSchema),
+    defaultValues: {
+      firstName: admin.firstName ?? "",
+      lastName: admin.lastName ?? "",
+      email: admin.email ?? "",
+      phoneNumber: admin.phoneNumber ?? "",
+      location: admin.location ?? "",
+    },
+  });
+
+  const onSubmit = (formData: updateAdminInput) => {
+    updateAdminMutation.mutate({ id: admin.id, data: formData }, { onSuccess: onClose });
+  };
+
+  return (
+    <div className={modalWrapper}>
+      <div className={modalCard}>
+        <button onClick={onClose} className={modalClose}>
+          <X className="w-5 h-5" />
+        </button>
+
+        <p className="text-lg font-bold mb-1">Edit Admin</p>
+        <p className="text-sm text-gray-500 mb-4">Update this admin account.</p>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <InputField
+              label="First Name"
+              id="editFirstName"
+              placeholder="Enter First Name"
+              error={errors.firstName?.message}
+              {...register("firstName")}
+            />
+            <InputField
+              label="Last Name"
+              id="editLastName"
+              placeholder="Enter Last Name"
+              error={errors.lastName?.message}
+              {...register("lastName")}
+            />
+          </div>
+
+          <div className="mb-4">
+            <InputField
+              label="Email Address"
+              id="editEmail"
+              type="email"
+              placeholder="Enter Email Address"
+              error={errors.email?.message}
+              {...register("email")}
+            />
+          </div>
+
+          <div className="mb-4">
+            <InputField
+              label="Phone Number"
+              id="editPhoneNumber"
+              placeholder="Enter Phone Number"
+              error={errors.phoneNumber?.message}
+              {...register("phoneNumber")}
+            />
+          </div>
+
+          <div className="mb-6">
+            <InputField
+              label="Location"
+              id="editLocation"
+              placeholder="Enter Location"
+              error={errors.location?.message}
+              {...register("location")}
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={updateAdminMutation.isPending}
+              className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md py-2 text-sm font-medium disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <Button
+              type="submit"
+              loading={updateAdminMutation.isPending}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200"
+            >
+              Save Changes
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminAccounts() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
   const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
   const [sortFilter, setSortFilter] = useState<string | undefined>(undefined);
   const [showModal, setShowModal] = useState(false);
 
-  const { adminQuery, createAdminMutation } = useUsers();
+  const [viewingId, setViewingId] = useState<string | null>(null);
+  const [editingAdmin, setEditingAdmin] = useState<any | null>(null);
+  const [deletingAdmin, setDeletingAdmin] = useState<any | null>(null);
 
-  const { data, isLoading, refetch } = adminQuery({
+  const { adminQuery, createAdminMutation, deleteAdminMutation } = useUsers();
+
+  const { data, isLoading } = adminQuery({
     page,
     limit,
     search: search || undefined,
-    role: roleFilter,
     sort: sortFilter,
   });
 
@@ -106,37 +281,52 @@ export default function AdminAccounts() {
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     reset,
     formState: { errors },
-  } = useForm<createAdminInput>({
+  } = useForm<Omit<createAdminInput, "role">>({
     resolver: zodResolver(createAdminSchema),
   });
 
-  const role = watch("role");
-
   const tableData = useMemo(
     () =>
-      rawData.map((item: any) => {
-        const fullName =
+      rawData.map((item: any) => ({
+        id: item.id,
+        firstName: item.firstName,
+        lastName: item.lastName,
+        fullName:
           formatName(item.firstName, item.lastName) ||
-          formatName(item.fullName) ||
-          "Unknown Admin";
-
-        return {
-          _raw: item,
-          id: item.id,
-          fullName,
-          email: item.email || item.user?.email || "N/A",
-          phoneNumber: item.phoneNumber,
-          location: item.location,
-          role: item.role,
-          verificationStatus: item.verificationStatus,
-          createdAt: item.createdAt,
-        };
-      }),
+          item.fullName ||
+          "Unknown Admin",
+        email: item.email || "N/A",
+        phoneNumber: item.phoneNumber,
+        location: item.location,
+        role: item.role,
+        verificationStatus: item.verificationStatus,
+        createdAt: item.createdAt,
+      })),
     [rawData],
+  );
+
+  const actions = useMemo(
+    () => [
+      {
+        label: "View",
+        icon: <Eye className="w-4 h-4" />,
+        onClick: (row: any) => setViewingId(row.id),
+      },
+      {
+        label: "Edit",
+        icon: <Pencil className="w-4 h-4" />,
+        onClick: (row: any) => setEditingAdmin(row),
+      },
+      {
+        label: "Delete",
+        icon: <Trash2 className="w-4 h-4" />,
+        className: "p-2 text-gray-500 hover:bg-red-50 hover:text-red-600",
+        onClick: (row: any) => setDeletingAdmin(row),
+      },
+    ],
+    [],
   );
 
   const closeModal = () => {
@@ -144,12 +334,17 @@ export default function AdminAccounts() {
     reset();
   };
 
-  const onSubmit = (formData: createAdminInput) => {
-    createAdminMutation.mutate(formData, {
-      onSuccess: () => {
-        closeModal();
-        refetch?.();
-      },
+  const onSubmit = (formData: Omit<createAdminInput, "role">) => {
+    createAdminMutation.mutate(
+      { ...formData, role: "super_admin" },
+      { onSuccess: closeModal },
+    );
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deletingAdmin) return;
+    deleteAdminMutation.mutate(deletingAdmin.id, {
+      onSuccess: () => setDeletingAdmin(null),
     });
   };
 
@@ -175,22 +370,13 @@ export default function AdminAccounts() {
         <DataTable
           columns={COLUMNS}
           data={tableData}
+          actions={actions}
           rowsPerPageOptions={[5, 8, 10, 20]}
           defaultRowsPerPage={limit}
           showSearch={true}
           searchPlaceholder="Search admins..."
           searchableColumns={["fullName", "email", "role", "location", "verificationStatus"]}
           filters={[
-            {
-              key: 'role',
-              label: 'Role',
-              options: [
-                { value: 'super_admin', label: 'Super Admin' },
-                { value: 'supervisor', label: 'Supervisor' },
-                { value: 'operations', label: 'Operations' },
-                { value: 'support', label: 'Support' },
-              ],
-            },
             {
               key: 'sort',
               label: 'Sort',
@@ -201,7 +387,6 @@ export default function AdminAccounts() {
             },
           ]}
           onFilterChange={(active) => {
-            setRoleFilter(active.role && active.role !== 'all' ? active.role : undefined);
             setSortFilter(active.sort && active.sort !== 'all' ? active.sort : undefined);
             setPage(1);
           }}
@@ -222,13 +407,54 @@ export default function AdminAccounts() {
         />
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
+      {viewingId && <AdminViewModal id={viewingId} onClose={() => setViewingId(null)} />}
+
+      {editingAdmin && (
+        <AdminEditModal admin={editingAdmin} onClose={() => setEditingAdmin(null)} />
+      )}
+
+      {deletingAdmin && (
+        <div className={modalWrapper}>
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6 relative">
             <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              onClick={() => setDeletingAdmin(null)}
+              className={modalClose}
             >
+              <X className="w-5 h-5" />
+            </button>
+
+            <p className="text-lg font-bold mb-1">Delete Admin</p>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to remove {deletingAdmin.fullName}? This cannot be undone.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setDeletingAdmin(null)}
+                disabled={deleteAdminMutation.isPending}
+                className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md py-2 text-sm font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={deleteAdminMutation.isPending}
+                className="flex items-center justify-center gap-2 flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 disabled:opacity-50"
+              >
+                {deleteAdminMutation.isPending && <Spinner className="h-4 w-4" />}
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showModal && (
+        <div className={modalWrapper}>
+          <div className={modalCard}>
+            <button onClick={closeModal} className={modalClose}>
               <X className="w-5 h-5" />
             </button>
 
@@ -276,29 +502,13 @@ export default function AdminAccounts() {
                 />
               </div>
 
-              <div className="mb-4">
+              <div className="mb-6">
                 <InputField
                   label="Location"
                   id="location"
                   placeholder="Enter Location"
                   error={errors.location?.message}
                   {...register("location")}
-                />
-              </div>
-
-              <div className="mb-6">
-                <Dropdown
-                  width="full"
-                  label="Role"
-                  id="role"
-                  value={role || ""}
-                  onChange={(e) =>
-                    setValue("role", e.target.value as createAdminInput["role"], {
-                      shouldValidate: true,
-                    })
-                  }
-                  options={ROLE_OPTIONS}
-                  error={errors.role?.message as string}
                 />
               </div>
 

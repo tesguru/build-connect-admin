@@ -2,7 +2,8 @@ import { DataTable } from "@/components/ui/Datatable";
 import { useBid } from "@/libs/hooks/useBid";
 import { Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
+import { cleanName } from "@/libs/utils/helpers";
 
 const COLUMNS = [
   {
@@ -68,20 +69,11 @@ const COLUMNS = [
 
 export default function SubmittedBids() {
   const router = useRouter();
-  const [page, setPage]   = useState(1);
-  const [limit, setLimit] = useState(8);
-  const [search, setSearch] = useState('');
-
   const { submittedQuery } = useBid();
-  const { data, isLoading } = submittedQuery({
-    page,
-    limit,
-    search: search || undefined,
-  });
+  // This endpoint has no `search` param, so filtering happens client-side over one fetch.
+  const { data, isLoading } = submittedQuery({ limit: 100 });
 
-  // API shape: { data: [...], meta: { totalDocuments } }
   const rawData    = data?.data?.data  || [];
-  const totalCount: number = data?.data?.meta?.totalDocuments ?? rawData.length;
 
   const tableData = useMemo(
     () =>
@@ -89,7 +81,7 @@ export default function SubmittedBids() {
         id:               item.id,
         builderId:        item.builder?.id      || "",
         project:          item.project?.title   || "N/A",
-        builderName:      item.builder?.name    || "N/A",
+        builderName:      cleanName(item.builder?.name) || "N/A",
         builderEmail:     item.builder?.email   || "",
         bidAmount:        item.bidAmount,
         proposedTimeline: item.proposedTimeline,
@@ -124,25 +116,13 @@ export default function SubmittedBids() {
           data={tableData}
           actions={actions}
           rowsPerPageOptions={[5, 8, 10, 20]}
-          defaultRowsPerPage={limit}
+          defaultRowsPerPage={8}
           showSearch={true}
           searchPlaceholder="Search submitted bids..."
           searchableColumns={["project", "builderName", "status"]}
           showSerialNumber={true}
           isLoading={isLoading}
-          // ── Server-side pagination ──────────────────────────────────────
-          serverSide={true}
-          totalCount={totalCount}
-          currentPage={page}
-          onPageChange={(newPage) => setPage(newPage)}
-          onSearchChange={(term) => {
-            setSearch(term);
-            setPage(1);
-          }}
-          onRowsPerPageChange={(newLimit) => {
-            setLimit(newLimit);
-            setPage(1);
-          }}
+          emptyMessage="No submitted bids yet"
         />
       </div>
     </div>

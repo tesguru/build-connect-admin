@@ -1,5 +1,6 @@
 import { APIURLS } from "../constants/apiurl";
-import axiosInstance from "../utils/axios.ts";
+import type { AxiosResponse } from "axios";
+import axiosInstance from "../utils/axios";
 
 
 interface User {
@@ -21,31 +22,37 @@ interface PaginatedResponse<T> {
 }
 
 export const UserService = {
-getallusers: (params :any): Promise<PaginatedResponse<User>> => 
+getallusers: (params :any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/`, { params }),   
-getSingleUser: (id: any): Promise<User> => 
+getSingleUser: (id: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}`),
-getBids: (id: any, params: any): Promise<User> => 
+getBids: (id: any, params: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}/bids`, {params}),
 getBidDetail: (id: string, bidId: string): Promise<any> =>
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}/bids/${bidId}`),
-getActivity: (id: any, params: any): Promise<User> => 
+getActivity: (id: any, params: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}/activity`, {params}),
- getProjects: (id: any, params: any): Promise<User> => 
+ getProjects: (id: any, params: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}/projects`, {params}),
- getDocuments: (id: any, params: any): Promise<User> => 
+ getDocuments: (id: any, params: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}/documents`, {params}),
-createClients: (id: any): Promise<User> => 
+createClients: (id: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/clients`),
-createBuilders: (id: any): Promise<User> => 
+createBuilders: (id: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/builders`),
-getAllAccountDeletions: ( params: any): Promise<User> => 
+getAllAccountDeletions: ( params: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.DELETE_REQUESTS}`, {params}),
-deleteAccount: (id: any, data: any): Promise<User> => 
+deleteAccount: (id: any, data: any): Promise<AxiosResponse<any>> => 
     axiosInstance.patch(`${APIURLS.DASHBOARD.DELETE_REQUESTS}/${id}/resolve`, data),
-createAdmin: (data: any): Promise<User> =>
+createAdmin: (data: any): Promise<AxiosResponse<any>> =>
     axiosInstance.post(`${APIURLS.DASHBOARD.ADMIN}/`, data),
-  getAdmin: (params: any): Promise<User> =>
+  getAdmin: (params: any): Promise<any> =>
     axiosInstance.get(`${APIURLS.DASHBOARD.ADMIN}/`, {params}),
+  getAdminById: (id: string): Promise<any> =>
+    axiosInstance.get(`${APIURLS.DASHBOARD.ADMIN}/${id}`),
+  updateAdmin: (id: string, data: any): Promise<any> =>
+    axiosInstance.patch(`${APIURLS.DASHBOARD.ADMIN}/${id}`, data),
+  deleteAdmin: (id: string): Promise<any> =>
+    axiosInstance.delete(`${APIURLS.DASHBOARD.ADMIN}/${id}`),
 };
 

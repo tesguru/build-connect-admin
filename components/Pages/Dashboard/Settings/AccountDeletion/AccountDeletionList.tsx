@@ -75,22 +75,17 @@ const COLUMNS = [
 ];
 
 export default function AccountDeletionRequests() {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(8);
-  const [search, setSearch] = useState('');
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
   const [notes, setNotes] = useState("");
 
   const { getAllAccountDeletionQuery, requestAccountDeletion } = useUsers();
 
+  // This endpoint has no `search` param, so filtering happens client-side over one fetch.
   const { data, isLoading, refetch } = getAllAccountDeletionQuery({
-    page,
-    limit,
-    search: search || undefined,
+    limit: 100,
   });
 
   const rawData = data?.data?.data || [];
-  const totalCount: number = data?.data?.meta?.totalDocuments ?? rawData.length;
 
   const tableData = useMemo(
     () =>
@@ -166,24 +161,13 @@ export default function AccountDeletionRequests() {
           data={tableData}
           actions={actions}
           rowsPerPageOptions={[5, 8, 10, 20]}
-          defaultRowsPerPage={limit}
+          defaultRowsPerPage={8}
           showSearch={true}
           searchPlaceholder="Search account deletion requests..."
           searchableColumns={["userName", "userEmail", "status", "reason"]}
           showSerialNumber={true}
           isLoading={isLoading}
-          serverSide={true}
-          totalCount={totalCount}
-          currentPage={page}
-          onPageChange={(newPage) => setPage(newPage)}
-          onSearchChange={(term) => {
-            setSearch(term);
-            setPage(1);
-          }}
-          onRowsPerPageChange={(newLimit) => {
-            setLimit(newLimit);
-            setPage(1);
-          }}
+          emptyMessage="No deletion requests yet"
         />
       </div>
 

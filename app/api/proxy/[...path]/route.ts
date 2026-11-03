@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://admin-buildconnect.ivantage.africa/v1/';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://buildconnect-admin-api.ivantage.africa/v1/';
 
 if (!API_URL) {
   console.warn("⚠️ NEXT_PUBLIC_API_URL is not configured!");

@@ -147,11 +147,7 @@ const Milestones = ({ project }: any) => {
           <h1 className="text-2xl font-bold text-gray-900">Milestones</h1>
           <div className="flex gap-2">
            
-            <ActionButton
-              label="Add Milestone"
-              icon={<PlusIcon />}
-              href={`/create-milestones/${project.id}`}
-            />
+           
           </div>
         </div>
         
@@ -181,11 +177,7 @@ const Milestones = ({ project }: any) => {
             <RefreshCw className="h-4 w-4" />
             Refresh
           </button>
-          <ActionButton
-            label="Add Milestone"
-            icon={<PlusIcon />}
-            href={`/create-milestones/${project.id}`}
-          />
+       
         </div>
       </div>
 

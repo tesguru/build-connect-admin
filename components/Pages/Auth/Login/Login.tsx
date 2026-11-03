@@ -10,21 +10,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/libs/hooks/useAuth";
 import { loginSchema } from "@/libs/schema/authschema";
-import type { LoginFormData } from "@/libs/schema/authschema"; // Add this import
+import type { loginInput } from "@/libs/schema/authschema";
 
 const Login = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({ // Add type for useForm
+  } = useForm<loginInput>({
     resolver: zodResolver(loginSchema),
   });
 
   const { loginMutation } = useAuth();
 
-  // Add the handleSubmit function
-  const handleLogin = handleSubmit((data: LoginFormData) => {
+  const handleLogin = handleSubmit((data: loginInput) => {
     loginMutation.mutate(data);
   });
 
@@ -46,7 +45,7 @@ const Login = () => {
             label="Email Address"
             id="email"
             placeholder="Enter Email Address"
-            error={errors.emailAddress?.message}
+            error={errors.email?.message}
             {...register("email")}
           />
         </div>

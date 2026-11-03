@@ -9,6 +9,7 @@ import BackButton from "@/components/ui/BackButton";
 import { InfoGrid, InfoItem } from "@/components/ui/Custom/Infogrid";
 import { useProjects } from "@/libs/hooks/useProjects";
 import { UserDetailsProps } from "../UserDetails/UserDetails";
+import { cleanName } from "@/libs/utils/helpers";
 
 const ProjectDetails = ({ id }: UserDetailsProps) => {
   const { singleProjectQuery } = useProjects();
@@ -66,12 +67,12 @@ const ProjectDetails = ({ id }: UserDetailsProps) => {
     {
       icon: User,
       label: 'Client',
-      value: project?.client?.name ?? "Not specified"
+      value: cleanName(project?.client?.name) || "Not specified"
     },
     {
       icon: Building2,
       label: 'Builder',
-      value: project?.builder?.name ?? "Abc Constructions"
+      value: cleanName(project?.builder?.name) || "Not specified"
     },
     {
       icon: NairaIcon,

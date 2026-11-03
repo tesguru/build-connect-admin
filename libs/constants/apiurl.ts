@@ -8,8 +8,7 @@ export const APIURLS = {
       FORGOT_PASSWORD: '/auth/forgot-password',
       VERIFYOTP: '/auth/verify-reset-otp',
       RESENDOTP: '/auth/resend-reset-otp',
-      CHANGEPASSWORD: '/auth/reset-password',
-      REFRESHTOKEN: '/auth/reset-token'
+      CHANGEPASSWORD: '/auth/reset-password'
     },
     DASHBOARD: {
     USERS: '/admin/users',
@@ -31,7 +30,7 @@ export const APIURLS = {
   },
     INDEX: {
     DASHBOARDANALYTICS: '/admin/analytics/',
-    RECENTACTIVITY: '/admin/support',
+    RECENTACTIVITY: '/admin/activity/',
   },
     },
  

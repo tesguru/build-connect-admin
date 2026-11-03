@@ -139,11 +139,7 @@ export default function Documentation({ project }: any) {
       
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Documentation</h1>
-           <ActionButton
-              label="Add Milestone"
-              icon={<PlusIcon />}
-              href={`/create-documents/${project.id}`}
-            />
+           
         </div>
         <SectionLoader label="Loading documents..." />
       </div>
@@ -167,13 +163,7 @@ export default function Documentation({ project }: any) {
 
   return (
     <div className="p-6">
-      <div className="flex justify-end mb-3">
-       <ActionButton
-              label="Add Dcouments"
-              icon={<PlusIcon />}
-              href={`/create-documents/${project?.id}`}
-            />
-            </div>
+      
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Documentation</h1>
         <span className="text-sm text-gray-500">

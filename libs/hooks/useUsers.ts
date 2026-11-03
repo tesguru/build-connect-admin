@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useToast } from './usetoast';
 import { useAuthStore } from '../store/Authstore';
@@ -16,6 +16,7 @@ import { UserService } from '../services/UserServices';
 export const useUsers = () => {
   const router = useRouter();
 const { toast } = useToast();
+const queryClient = useQueryClient();
   
 const userQuery = (params: any) => {
   return useQuery({
@@ -136,10 +137,43 @@ const adminQuery = (params: object) => {
 const createAdminMutation = useMutation({
   mutationFn: UserService.createAdmin,
   onSuccess: (data) => {
+    queryClient.invalidateQueries({ queryKey: ['admins'] });
     toast.success("Success", "Admin account created successfully");
   },
   onError: (error: any) => {
     handleApiError(error, "Failed to create admin", toast);
+  },
+});
+
+const adminDetailQuery = (id: string) => {
+  return useQuery({
+    queryKey: ['adminDetail', id],
+    queryFn: () => UserService.getAdminById(id),
+    enabled: Boolean(id),
+  });
+};
+
+const updateAdminMutation = useMutation({
+  mutationFn: ({ id, data }: { id: string; data: any }) =>
+    UserService.updateAdmin(id, data),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['admins'] });
+    queryClient.invalidateQueries({ queryKey: ['adminDetail'] });
+    toast.success("Success", "Admin account updated successfully");
+  },
+  onError: (error: any) => {
+    handleApiError(error, "Failed to update admin", toast);
+  },
+});
+
+const deleteAdminMutation = useMutation({
+  mutationFn: (id: string) => UserService.deleteAdmin(id),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['admins'] });
+    toast.success("Success", "Admin account deleted successfully");
+  },
+  onError: (error: any) => {
+    handleApiError(error, "Failed to delete admin", toast);
   },
 });
 
@@ -157,6 +191,9 @@ const createAdminMutation = useMutation({
     getAllAccountDeletionQuery,
     requestAccountDeletion,
     adminQuery,
-    createAdminMutation
+    adminDetailQuery,
+    createAdminMutation,
+    updateAdminMutation,
+    deleteAdminMutation
    };
 };

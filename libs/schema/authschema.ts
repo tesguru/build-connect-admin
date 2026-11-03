@@ -17,8 +17,18 @@ export const createAdminSchema = z.object({
   email: z.string().email("Invalid email address"),
   phoneNumber: z.string().min(4, "Phone number is required"),
   location: z.string().min(2, "Location is required"),
-  role: z.enum(["super_admin", "supervisor", "operations", "support"]),
+  role: z.enum(["super_admin"]).default("super_admin"),
 });
+
+export const updateAdminSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  phoneNumber: z.string().min(4, "Phone number is required"),
+  location: z.string().min(2, "Location is required"),
+});
+
+export type updateAdminInput = z.infer<typeof updateAdminSchema>;
 
 export type createAdminInput = z.infer<typeof createAdminSchema>;
 

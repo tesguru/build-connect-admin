@@ -1,6 +1,7 @@
 import { DataTable } from "@/components/ui/Datatable";
 import { useBid } from "@/libs/hooks/useBid";
 import { useState, useMemo } from "react";
+import { cleanName } from "@/libs/utils/helpers";
 
 const COLUMNS = [
   {
@@ -69,7 +70,7 @@ export default function EOI() {
       rawData.map((item: any) => ({
         id: item.id,
         project: item.project?.title || "N/A",
-        builder: item.builder?.name || "N/A",
+        builder: cleanName(item.builder?.name) || "N/A",
         interestLevel: item.message || "N/A",
         status: item.status,
         submittedDate: item.sentAt,

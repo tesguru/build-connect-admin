@@ -48,28 +48,28 @@ const UserDetails = ({ id }: UserDetailsProps) => {
       icon: Building2,
       label: 'Total Projects',
       value: user.projectsCount || 0,
-      change: 15,
+   
       isPositive: true
     },
     {
       icon: AlertCircle,
       label: 'Documents',
       value: user.documentsCount || 0,
-      change: 15,
+    
       isPositive: false
     },
     {
       icon: AlertTriangle,
       label: 'Total Spent',
       value: '₦0', 
-      change: 15,
+  
       isPositive: true
     },
     {
       icon: AlertTriangle,
       label: 'Total Earned',
       value: '₦0', 
-      change: 15,
+  
       isPositive: true
     }
   ];

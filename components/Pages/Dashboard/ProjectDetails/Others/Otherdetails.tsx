@@ -12,7 +12,7 @@ const Otherdetails = ({project}:any) => {
         { id: 'overview', label: 'Overview' },
         { id: 'milestones', label: 'Milestones' },
               { id: 'documentation', label: 'Documentation' },
-            { id: 'meetings', label: 'Meetings' },
+       
       ];
        return (
       <div className="p-6">

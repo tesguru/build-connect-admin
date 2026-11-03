@@ -1,5 +1,6 @@
 import { APIURLS } from "../constants/apiurl";
-import axiosInstance from "../utils/axios.ts";
+import type { AxiosResponse } from "axios";
+import axiosInstance from "../utils/axios";
 
 
 interface User {
@@ -22,7 +23,7 @@ interface PaginatedResponse<T> {
 
 export const MeetingService = {
 
- getMeetings: (params: any): Promise<User> => 
+ getMeetings: (params: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.MEETINGS}/`, {params}),
    createMeeting: (data: { projectId: string; meetingData: any }): Promise<any> => 
   axiosInstance.post(

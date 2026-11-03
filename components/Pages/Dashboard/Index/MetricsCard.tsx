@@ -28,8 +28,8 @@ export default function MetricsDashboard() {
     },
     {
       icon: AlertTriangle,
-      label: 'Open Disputes',
-      value: analytics?.openDisputes ?? 0,
+      label: 'Open Tickets',
+      value: analytics?.openTickets ?? 0,
     },
     {
       icon: NairaIcon,

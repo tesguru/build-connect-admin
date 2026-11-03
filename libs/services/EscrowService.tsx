@@ -1,5 +1,5 @@
 import { APIURLS } from "../constants/apiurl";
-import axiosInstance from "../utils/axios.ts";
+import axiosInstance from "../utils/axios";
 
 
 export const EscrowService = {

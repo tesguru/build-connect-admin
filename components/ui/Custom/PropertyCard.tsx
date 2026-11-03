@@ -4,7 +4,7 @@ interface PropertyCardProps {
   title: string;
   address: string;
   price: string | number;
-  image: string;
+  image?: string;
   status?: string;
 }
 
@@ -18,11 +18,17 @@ export function PropertyCard({
   return (
     <div className="max-w-sm bg-white rounded-3xl shadow-lg overflow-hidden">
       <div className="relative">
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-55 object-cover"
-        />
+        {image ? (
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-55 object-cover"
+          />
+        ) : (
+          <div className="w-full h-55 bg-gray-100 flex items-center justify-center">
+            <span className="text-sm text-gray-400">No photo</span>
+          </div>
+        )}
       </div>
 
       <div className="p-6">

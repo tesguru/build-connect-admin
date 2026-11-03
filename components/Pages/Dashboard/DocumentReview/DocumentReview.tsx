@@ -17,11 +17,7 @@ const DocumentReview = () => {
         </div>
 
              <div>
-                <ActionButton
-          label="Add Document"
-          icon={<PlusIcon />}
-          href="/add-documents"
-        />
+             
              </div>
              
         </div>

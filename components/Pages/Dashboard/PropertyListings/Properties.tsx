@@ -3,14 +3,9 @@ import DashboardLayout from '../DashboardLayout/DashboardLayout'
 import { URLS } from '@/libs/constants/pageurl'
 import ActionButton from '@/components/ui/Button/ActionButton'
 import { PropertyCard } from '@/components/ui/Custom/PropertyCard'
-import MetricsCard from '@/components/ui/Custom/MetricsCard'
 import { useProperty } from '@/libs/hooks/useProperty'
 import { useRouter } from 'next/navigation'
 import {
-  AlertCircle,
-  AlertTriangle,
-  Building2,
-  PlusIcon,
   SlidersHorizontal,
   X,
   Search,
@@ -60,13 +55,6 @@ const Properties = () => {
   const router = useRouter()
   const { getPropertiesQuery } = useProperty()
 
-  const metrics = [
-    { icon: Building2, label: 'Total Properties', value: '24', isPositive: true },
-    { icon: AlertCircle, label: 'For Sale', value: '9', isPositive: false },
-    { icon: AlertTriangle, label: 'Pre Sale', value: '8', isPositive: true },
-    { icon: AlertTriangle, label: 'Verified', value: '8', isPositive: true },
-  ]
-
   const [queryParams, setQueryParams] = useState<PropertyQueryParams>({ page: 1, limit: 20 })
   const [searchText, setSearchText] = useState('')
   const [showFilterModal, setShowFilterModal] = useState(false)
@@ -89,9 +77,7 @@ const Properties = () => {
         title: item.title ?? 'Untitled',
         address: item.location ?? 'Location not specified',
         price: item.price ? `₦${Number(item.price).toLocaleString()}` : 'Price on request',
-        image:
-          item.media?.[0]?.url ??
-          'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&h=600&fit=crop',
+        image: item.media?.[0]?.url,
         status: item.status?.charAt(0).toUpperCase() + item.status?.slice(1),
       })),
     [rawData],

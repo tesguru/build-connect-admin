@@ -9,7 +9,7 @@ import { NairaIcon } from '@/components/ui/Custom/NairaIcon';
 import { InfoGrid, InfoItem } from '@/components/ui/Custom/Infogrid';
 import { PageLoader } from '@/components/ui/Custom/LoadingState';
 import { useUsers } from '@/libs/hooks/useUsers';
-import { formatStatus } from '@/libs/utils/helpers';
+import { cleanName, formatStatus } from '@/libs/utils/helpers';
 
 interface ProjectBidDetailsProps {
   bidId: string;
@@ -66,7 +66,7 @@ const ProjectBidDetails = ({ bidId, userId }: ProjectBidDetailsProps) => {
 
   const infoItems: InfoItem[] = [
     { icon: Building2, label: 'Project', value: project.title ?? '—' },
-    { icon: User, label: 'Builder', value: builder?.name ?? '—' },
+    { icon: User, label: 'Builder', value: cleanName(builder?.name) || '—' },
     { icon: NairaIcon, label: 'Bid Amount', value: formatNaira(bid.bidAmount) },
     { icon: MapPin, label: 'Location', value: project.location ?? '—' },
     { icon: Calendar, label: 'Submitted', value: formatDate(bid.submittedAt) },

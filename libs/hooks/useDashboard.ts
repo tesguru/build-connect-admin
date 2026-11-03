@@ -17,10 +17,10 @@ const getAnalyticsQuery = () => {
     queryFn: () => DashboardService.getAnalytics(),
   });
  };
-const getRecentActivity = ( ) => {
+const getRecentActivity = (params?: object) => {
   return useQuery({
-    queryKey: ['getRecentActivity',], 
-    queryFn: () => DashboardService.getRecentActivity(),
+    queryKey: ['getRecentActivity', params],
+    queryFn: () => DashboardService.getRecentActivity(params),
   })
  };
 

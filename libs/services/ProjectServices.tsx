@@ -1,5 +1,6 @@
 import { APIURLS } from "../constants/apiurl";
-import axiosInstance from "../utils/axios.ts";
+import type { AxiosResponse } from "axios";
+import axiosInstance from "../utils/axios";
 
 
 interface User {
@@ -21,9 +22,9 @@ interface PaginatedResponse<T> {
 }
 
 export const ProjectService = {
-getAllProjects: (params :any): Promise<PaginatedResponse<User>> => 
+getAllProjects: (params :any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/`, { params }),   
-getSingleProject: (id: any): Promise<User> => 
+getSingleProject: (id: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/${id}`),
 getMilestones: (id: any, params?: any) => 
     axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/milestones/${id}/milestones`, { params }),
@@ -31,7 +32,7 @@ getDocuments: (id: any, params?: any) =>
     axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/documents/${id}/documents`, { params }),
 getMeetings: (id: any, params?: any) => 
     axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/meetings/${id}/meetings`, { params }),
-getMilestonesDetails: (id: any, mileStoneId: any): Promise<User> => 
+getMilestonesDetails: (id: any, mileStoneId: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.PROJECTS}/milestones/${id}/milestones/${mileStoneId}`),
 createMilestones: (data: { projectId: string; milestoneData: any }): Promise<any> => 
   axiosInstance.post(

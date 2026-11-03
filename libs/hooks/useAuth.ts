@@ -14,12 +14,12 @@ export const useAuth = () => {
 const { toast } = useToast();
   const loginMutation = useMutation({
   mutationFn: AuthService.login,
-  onSuccess: (res: any) => {
+  onSuccess: async (res: any) => {
     const loginData = res?.data;
  
 if (loginData.statusCode === 200) {
   const { authToken, refreshToken, user } = loginData.data;
-  setAuthData(authToken, refreshToken, user);
+  await setAuthData(authToken, refreshToken, user);
   toast.success("Success", "Login Successful");
     router.push("/dashboard");
 }
@@ -83,19 +83,6 @@ if (loginData.statusCode === 200) {
      handleApiError(error, "An error occured", toast);
   }
 });
- const refreshTokenMutation = useMutation({
-  mutationFn: AuthService.refreshtoken,
-  onSuccess: (data: any) => {
-      const refreshToken = data?.data;
-   if (refreshToken?.statusCode === 200) {
-  toast.success("Success", "Token refresh sucessfully");
-  router.push(URLS.AUTH.LOGIN)
- }
-  },
-  onError: (error: any) => {
-     handleApiError(error, "An error occured", toast);
-  }
-});
   const verifyOtpMutation = useMutation({
     mutationFn: AuthService.requestotp,
     onSuccess: (data:any, submittedData :any) => { 
@@ -129,7 +116,6 @@ router.push(
     verifyOtpMutation,
     resendOtpMutation,
     logout,
-    resetPasswordMutation,
-    refreshTokenMutation
+    resetPasswordMutation
    };
 };

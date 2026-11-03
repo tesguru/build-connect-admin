@@ -1,140 +1,131 @@
 import { DataTable } from "@/components/ui/Datatable";
-import { Edit, Eye, Trash2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useDashboard } from "@/libs/hooks/useDashboard";
+import { cleanName, formatStatus } from "@/libs/utils/helpers";
 
-const MOCK_ACTIVITIES = [
-  { id: 1, type: 'Verification', activity: 'Builder verification completed', detail: 'ABC Construction has been verified', status: 'Review', date: '17/01/2025' },
-  { id: 2, type: 'Project', activity: 'New project milestone', detail: 'Roofing milestone pending for Villa Grande', status: 'Review', date: '17/01/2025' },
-  { id: 3, type: 'Dispute', activity: 'Dispute raised', detail: 'Payment dispute for Project Sunny Heights', status: 'Review', date: '17/01/2025' },
-  { id: 4, type: 'Project', activity: 'New project milestone', detail: 'Foundation milestone completed for Villa Grande', status: 'Review', date: '17/01/2025' },
-  { id: 5, type: 'Dispute', activity: 'Dispute raised', detail: 'Payment dispute for Project Sunny Heights', status: 'Review', date: '17/01/2025' },
-  { id: 6, type: 'Verification', activity: 'Builder verification', detail: 'ABC Construction verification is under review', status: 'Review', date: '17/01/2025' },
-  { id: 7, type: 'Bid', activity: 'New bid submitted', detail: 'Express Builders submitted bid for Ocean View', status: 'Review', date: '17/01/2025' },
-  { id: 8, type: 'Verification', activity: 'Builder verification completed', detail: 'ABC Construction has been verified', status: 'Review', date: '17/01/2025' },
-  { id: 9, type: 'Project', activity: 'New project milestone', detail: 'Electrical work completed for Villa Grande', status: 'Completed', date: '16/01/2025' },
-  { id: 10, type: 'Verification', activity: 'Builder verification completed', detail: 'XYZ Builders has been verified', status: 'Completed', date: '16/01/2025' },
-  { id: 11, type: 'Project', activity: 'New project milestone', detail: 'Plumbing milestone for Ocean View', status: 'Pending', date: '18/01/2025' },
-  { id: 12, type: 'Bid', activity: 'New bid submitted', detail: 'Quality Builders submitted bid for Sunset Plaza', status: 'Pending', date: '18/01/2025' },
-  { id: 13, type: 'Verification', activity: 'Builder verification', detail: 'Prime Construction verification pending', status: 'Pending', date: '18/01/2025' },
-  { id: 14, type: 'Project', activity: 'New project milestone', detail: 'Painting work for Villa Grande', status: 'Completed', date: '15/01/2025' },
-  { id: 15, type: 'Dispute', activity: 'Dispute resolved', detail: 'Payment dispute resolved for Ocean View', status: 'Completed', date: '15/01/2025' },
-];
+const ACTIVITY_TYPES = [
+  'user_registered',
+  'project_created',
+  'bid_submitted',
+  'interest_expressed',
+  'contract_generated',
+  'contract_signed',
+  'payment_instruction_sent',
+] as const;
+
+const typeStyles: Record<string, string> = {
+  user_registered: 'bg-blue-100 text-blue-700',
+  project_created: 'bg-indigo-100 text-indigo-700',
+  bid_submitted: 'bg-purple-100 text-purple-700',
+  interest_expressed: 'bg-amber-100 text-amber-700',
+  contract_generated: 'bg-cyan-100 text-cyan-700',
+  contract_signed: 'bg-green-100 text-green-700',
+  payment_instruction_sent: 'bg-rose-100 text-rose-700',
+};
+
+const formatDateTime = (value?: string | null) =>
+  value ? new Date(value).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 
 export default function RecentActivity() {
-  const [activeTab, setActiveTab] = useState('Review');
+  const [activeTab, setActiveTab] = useState<string>('all');
 
   const { getRecentActivity } = useDashboard();
-  const { data, isLoading } = getRecentActivity();
+  const { data, isLoading, error } = getRecentActivity({ limit: 100 });
 
-  const apiActivities = data?.data?.data || [];
+  const activities = useMemo(
+    () =>
+      ((data?.data?.data as any[]) ?? []).map((item: any) => ({
+        id: item.id,
+        type: item.type,
+        typeLabel: formatStatus(item.type) || '—',
+        description: item.description ?? '—',
+        actor: cleanName(item.actor?.name) || 'System',
+        entity: item.entityType ? `${formatStatus(item.entityType)} · ${item.entityId ?? '—'}` : '—',
+        occurredAt: item.occurredAt,
+      })),
+    [data],
+  );
 
-  const allActivities = useMemo(() => {
-    if (!Array.isArray(apiActivities) || apiActivities.length === 0) {
-      return MOCK_ACTIVITIES;
-    }
-    return apiActivities.map((item: any, index: number) => ({
-      id: item.id ?? index + 1,
-      type: item.type ?? '—',
-      activity: item.activity ?? item.title ?? '—',
-      detail: item.detail ?? item.description ?? '—',
-      status: item.status ?? 'Review',
-      date: item.date
-        ? item.date
-        : item.createdAt
-        ? new Date(item.createdAt).toLocaleDateString()
-        : '—',
-    }));
-  }, [apiActivities]);
+  const tabs = useMemo(
+    () => [
+      { name: 'all', label: 'All Activities', count: activities.length },
+      ...ACTIVITY_TYPES.map((type) => ({
+        name: type,
+        label: formatStatus(type),
+        count: activities.filter((activity) => activity.type === type).length,
+      })),
+    ],
+    [activities],
+  );
 
+  const filteredActivities = useMemo(
+    () => (activeTab === 'all' ? activities : activities.filter((activity) => activity.type === activeTab)),
+    [activities, activeTab],
+  );
 
-  const tabs = [
-    { name: 'All Activities', count: allActivities.length },
-    { name: 'Completed', count: allActivities.filter(a => a.status === 'Completed').length },
-    { name: 'Review', count: allActivities.filter(a => a.status === 'Review').length },
-    { name: 'Pending', count: allActivities.filter(a => a.status === 'Pending').length },
-  ];
-
-  const filteredActivities = activeTab === 'All Activities' 
-    ? allActivities 
-    : allActivities.filter(a => a.status === activeTab);
-
-  // Define table columns
   const columns = [
     {
-      key: 'type',
+      key: 'typeLabel',
       header: 'Type',
-      render: (row) => <span className="text-gray-900">{row.type}</span>
-    },
-    {
-      key: 'activity',
-      header: 'Activity',
-      render: (row) => <span className="text-gray-900">{row.activity}</span>
-    },
-    {
-      key: 'detail',
-      header: 'Details',
-      render: (row) => <span className="text-gray-600">{row.detail}</span>
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (row) => (
-        <span className={`px-3 py-1 rounded-md text-sm font-medium ${
-          row.status === 'Completed' 
-            ? 'bg-green-100 text-green-700'
-            : row.status === 'Pending'
-            ? 'bg-red-100 text-red-700'
-            : 'bg-blue-100 text-blue-700'
-        }`}>
-          {row.status}
+      render: (row: any) => (
+        <span className={`px-3 py-1 rounded-md text-xs font-medium whitespace-nowrap ${typeStyles[row.type] ?? 'bg-gray-100 text-gray-700'}`}>
+          {row.typeLabel}
         </span>
-      )
+      ),
     },
     {
-      key: 'date',
+      key: 'description',
+      header: 'Activity',
+      render: (row: any) => <span className="text-gray-900">{row.description}</span>,
+    },
+    {
+      key: 'actor',
+      header: 'Actor',
+      render: (row: any) => <span className="text-gray-700">{row.actor}</span>,
+    },
+    {
+      key: 'occurredAt',
       header: 'Date',
-      render: (row) => <span className="text-gray-900">{row.date}</span>
-    }
-  ];
-
-  const actions = [
-    {
-      label: 'View',
-      icon: <Eye className="w-4 h-4 text-gray-600" />,
-      onClick: (row) => alert(`Viewing activity: ${row.activity}`)
+      render: (row: any) => <span className="text-gray-500 whitespace-nowrap">{formatDateTime(row.occurredAt)}</span>,
     },
-    {
-      label: 'Edit',
-      icon: <Edit className="w-4 h-4 text-blue-600" />,
-      onClick: (row) => alert(`Editing activity: ${row.activity}`)
-    },
-    {
-      label: 'Delete',
-      icon: <Trash2 className="w-4 h-4 text-red-600" />,
-      onClick: (row) => {
-        if (confirm(`Delete activity: ${row.activity}?`)) {
-          alert('Activity deleted!');
-        }
-      }
-    }
   ];
 
   return (
     <div className="bg-gray-50 p-6 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Recent Activity</h1>
-        
-       
 
-        <DataTable 
+        <div className="border-b border-gray-200 mb-6 overflow-x-auto">
+          <nav className="flex space-x-6">
+            {tabs.map((tab) => (
+              <button
+                key={tab.name}
+                onClick={() => setActiveTab(tab.name)}
+                className={`pb-3 px-1 text-sm font-medium whitespace-nowrap transition-colors relative ${
+                  activeTab === tab.name ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {tab.label}
+                <span className="ml-1.5 text-xs text-gray-400">{tab.count}</span>
+                {activeTab === tab.name && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
+                )}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        <DataTable
           columns={columns}
           data={filteredActivities}
-          actions={actions}
-          rowsPerPageOptions={[5, 8, 10, 20]}
+          rowsPerPageOptions={[8, 10, 20, 50]}
           defaultRowsPerPage={8}
+          showSearch={true}
+          searchPlaceholder="Search activity..."
+          searchableColumns={["typeLabel", "description", "actor"]}
           showSerialNumber={true}
           isLoading={isLoading}
+          emptyMessage={error ? 'No data available' : 'No activity yet'}
         />
       </div>
     </div>

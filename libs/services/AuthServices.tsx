@@ -1,5 +1,5 @@
 import { APIURLS } from "../constants/apiurl";
-import axiosInstance from "../utils/axios.ts";
+import axiosInstance from "../utils/axios";
 
 
 
@@ -11,5 +11,4 @@ export const AuthService = {
    resendotp:(data: any) => axiosInstance.post(APIURLS.AUTH.RESENDOTP, data),
    requestotp:(data: any) => axiosInstance.post(APIURLS.AUTH.VERIFYOTP, data),
   resetpassword:(data: any) => axiosInstance.post(APIURLS.AUTH.CHANGEPASSWORD, data),
-    refreshtoken:(data: any) => axiosInstance.post(APIURLS.AUTH.REFRESHTOKEN, data),
 };

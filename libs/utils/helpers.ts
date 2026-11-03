@@ -16,6 +16,14 @@ export const formatName = (...parts: (string | null | undefined)[]) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 
+// Full names the API already returns as one string: collapse stray spaces but keep the owner's casing.
+export const cleanName = (...parts: (string | null | undefined)[]) =>
+  parts
+    .filter((part): part is string => Boolean(part && part.trim()))
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 export const formatStatus = (value?: string | null) =>
   value
     ? value
