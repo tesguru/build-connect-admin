@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useProjects } from "@/libs/hooks/useProjects";
 import ProjectMetrics from "./ProjectMetrics";
 import { useState, useMemo } from "react";
+import { cleanName } from "@/libs/utils/helpers";
 
 const COLUMNS = [
   {
@@ -14,50 +15,13 @@ const COLUMNS = [
   {
     key: "client",
     header: "Client",
-    render: (row: any) => <span>{row.client?.name || "N/A"}</span>,
+    render: (row: any) => <span>{cleanName(row.client?.name) || "N/A"}</span>,
   },
   {
     key: "builder",
     header: "Builder",
-    render: () => <span>Abc Construction</span>,
-  },
-  {
-    key: "status",
-    header: "Status",
     render: (row: any) => (
-      <span
-        className={`px-3 py-1 rounded-md text-sm font-medium ${
-          row.status === "active"
-            ? "bg-green-100 text-green-700"
-            : row.status === "bidding"
-            ? "bg-blue-100 text-blue-700"
-            : row.status === "draft"
-            ? "bg-gray-100 text-gray-700"
-            : row.status === "completed"
-            ? "bg-purple-100 text-purple-700"
-            : "bg-yellow-100 text-yellow-700"
-        }`}
-      >
-        {row.status?.charAt(0).toUpperCase() + row.status?.slice(1)}
-      </span>
-    ),
-  },
-  {
-    key: "budget",
-    header: "Budget",
-    render: (row: any) => (
-      <span>{row.budgetRange || `Range ${row.budgetRangeId}`}</span>
-    ),
-  },
-  {
-    key: "startDate",
-    header: "Start Date",
-    render: (row: any) => (
-      <span>
-        {row.startDate
-          ? new Date(row.startDate).toLocaleDateString()
-          : "Not set"}
-      </span>
+      <span>{cleanName(row.builder?.name) || "Unassigned"}</span>
     ),
   },
   {
@@ -91,7 +55,7 @@ export default function ProjectTable() {
   });
 
   const projects = data?.data?.data?.items || [];
-  const stats = data?.data?.data?.stats || [];
+  const stats = data?.data?.data?.stats || {};
   const totalCount: number = data?.data?.data?.meta?.totalDocuments ?? projects.length;
 
   const actions = useMemo(
@@ -119,7 +83,7 @@ export default function ProjectTable() {
           defaultRowsPerPage={limit}
           showSearch={true}
           searchPlaceholder="Search projects..."
-          searchableColumns={["title", "client.name", "status"]}
+          searchableColumns={["title", "client.name", "builder.name"]}
           showSerialNumber={true}
           isLoading={isLoading}
           // ── Server-side pagination ───────────────────────────────────────

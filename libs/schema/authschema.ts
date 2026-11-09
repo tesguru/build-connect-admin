@@ -63,6 +63,13 @@ export const verifyOtpSchema = z.object({
       otp: z.string().min(1, "Otp is required"),   
 });
 
+export const setupCodeSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  otp: z.string().regex(/^\d{6}$/, "Enter the 6-digit code from your email"),
+});
+
+export type SetupCodeInput = z.infer<typeof setupCodeSchema>;
+
 export const resetPasswordSchema = z.object({
   newPassword: z.string().min(8, "Password must be at least 8 characters"),
   confirmNewPassword: z.string(),

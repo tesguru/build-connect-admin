@@ -1,7 +1,7 @@
 import { DataTable } from "@/components/ui/Datatable";
 import { useUsers } from "@/libs/hooks/useUsers";
 import { formatName, formatStatus } from "@/libs/utils/helpers";
-import { Eye, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Eye, Ban, CheckCircle2, Pencil, Plus, Trash2, X, Send } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -68,6 +68,21 @@ const COLUMNS = [
         }`}
       >
         {formatStatus(row.verificationStatus) || "N/A"}
+      </span>
+    ),
+  },
+  {
+    key: "isActive",
+    header: "Account",
+    render: (row: any) => (
+      <span
+        className={`px-3 py-1 rounded-md text-sm font-medium ${
+          row.isActive === false
+            ? "bg-red-100 text-red-700"
+            : "bg-green-100 text-green-700"
+        }`}
+      >
+        {row.isActive === false ? "Inactive" : "Active"}
       </span>
     ),
   },
@@ -265,8 +280,20 @@ export default function AdminAccounts() {
   const [viewingId, setViewingId] = useState<string | null>(null);
   const [editingAdmin, setEditingAdmin] = useState<any | null>(null);
   const [deletingAdmin, setDeletingAdmin] = useState<any | null>(null);
+  const [resendingAdmin, setResendingAdmin] = useState<any | null>(null);
+  const [togglingAdmin, setTogglingAdmin] = useState<{
+    admin: any;
+    next: "activate" | "deactivate";
+  } | null>(null);
 
-  const { adminQuery, createAdminMutation, deleteAdminMutation } = useUsers();
+  const {
+    adminQuery,
+    createAdminMutation,
+    deleteAdminMutation,
+    activateAdminMutation,
+    deactivateAdminMutation,
+    resendInviteMutation,
+  } = useUsers();
 
   const { data, isLoading } = adminQuery({
     page,
@@ -302,6 +329,7 @@ export default function AdminAccounts() {
         location: item.location,
         role: item.role,
         verificationStatus: item.verificationStatus,
+        isActive: item.isActive !== false,
         createdAt: item.createdAt,
       })),
     [rawData],
@@ -318,6 +346,30 @@ export default function AdminAccounts() {
         label: "Edit",
         icon: <Pencil className="w-4 h-4" />,
         onClick: (row: any) => setEditingAdmin(row),
+      },
+      {
+        label: "Resend Invite",
+        icon: <Send className="w-4 h-4" />,
+        className: "p-2 text-gray-500 hover:bg-blue-50 hover:text-blue-600",
+        onClick: (row: any) => setResendingAdmin(row),
+      },
+      {
+        label: (row: any) => (row.isActive === false ? "Activate" : "Deactivate"),
+        icon: (row: any) =>
+          row.isActive === false ? (
+            <CheckCircle2 className="w-4 h-4" />
+          ) : (
+            <Ban className="w-4 h-4" />
+          ),
+        className: (row: any) =>
+          row.isActive === false
+            ? "p-2 text-gray-500 hover:bg-green-50 hover:text-green-600"
+            : "p-2 text-gray-500 hover:bg-amber-50 hover:text-amber-600",
+        onClick: (row: any) =>
+          setTogglingAdmin({
+            admin: row,
+            next: row.isActive === false ? "activate" : "deactivate",
+          }),
       },
       {
         label: "Delete",
@@ -345,6 +397,27 @@ export default function AdminAccounts() {
     if (!deletingAdmin) return;
     deleteAdminMutation.mutate(deletingAdmin.id, {
       onSuccess: () => setDeletingAdmin(null),
+    });
+  };
+
+  const handleConfirmResend = () => {
+    if (!resendingAdmin) return;
+    resendInviteMutation.mutate(resendingAdmin.id, {
+      onSuccess: () => setResendingAdmin(null),
+    });
+  };
+
+  const isToggling =
+    activateAdminMutation.isPending || deactivateAdminMutation.isPending;
+
+  const handleConfirmToggle = () => {
+    if (!togglingAdmin) return;
+    const mutation =
+      togglingAdmin.next === "activate"
+        ? activateAdminMutation
+        : deactivateAdminMutation;
+    mutation.mutate(togglingAdmin.admin.id, {
+      onSuccess: () => setTogglingAdmin(null),
     });
   };
 
@@ -445,6 +518,91 @@ export default function AdminAccounts() {
               >
                 {deleteAdminMutation.isPending && <Spinner className="h-4 w-4" />}
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {resendingAdmin && (
+        <div className={modalWrapper}>
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6 relative">
+            <button
+              onClick={() => setResendingAdmin(null)}
+              className={modalClose}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <p className="text-lg font-bold mb-1">Resend Invite</p>
+            <p className="text-sm text-gray-500 mb-6">
+              Email a new setup code to {resendingAdmin.fullName}? The previous code
+              stops working immediately and the new one is valid for 48 hours.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setResendingAdmin(null)}
+                disabled={resendInviteMutation.isPending}
+                className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md py-2 text-sm font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmResend}
+                disabled={resendInviteMutation.isPending}
+                className="flex items-center justify-center gap-2 flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 disabled:opacity-50"
+              >
+                {resendInviteMutation.isPending && <Spinner className="h-4 w-4" />}
+                Resend Invite
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {togglingAdmin && (
+        <div className={modalWrapper}>
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6 relative">
+            <button
+              onClick={() => setTogglingAdmin(null)}
+              className={modalClose}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <p className="text-lg font-bold mb-1">
+              {togglingAdmin.next === "activate" ? "Activate Admin" : "Deactivate Admin"}
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              {togglingAdmin.next === "activate"
+                ? `Restore sign-in access for ${togglingAdmin.admin.fullName}?`
+                : `Deactivate ${togglingAdmin.admin.fullName}? Their active sessions end immediately.`}
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setTogglingAdmin(null)}
+                disabled={isToggling}
+                className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md py-2 text-sm font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmToggle}
+                disabled={isToggling}
+                className={`flex items-center justify-center gap-2 flex-1 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 disabled:opacity-50 ${
+                  togglingAdmin.next === "activate"
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-amber-600 hover:bg-amber-700"
+                }`}
+              >
+                {isToggling && <Spinner className="h-4 w-4" />}
+                {togglingAdmin.next === "activate" ? "Activate" : "Deactivate"}
               </button>
             </div>
           </div>

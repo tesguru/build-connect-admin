@@ -8,9 +8,9 @@ interface Column {
 }
 
 interface RowAction {
-  label: string;
-  icon: React.ReactNode;
-  className?: string;
+  label: string | ((row: any) => string);
+  icon: React.ReactNode | ((row: any) => React.ReactNode);
+  className?: string | ((row: any) => string);
   onClick: (row: any) => void;
 }
 
@@ -280,21 +280,29 @@ export function DataTable({
                   {actions && actions.length > 0 && (
                     <td className="py-3.5 px-4">
                       <div className="flex items-center justify-end gap-1.5">
-                        {actions.map((action, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => action.onClick(row)}
-                            className={`inline-flex items-center justify-center rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-100 ${
-                              action.className
-                                ? action.className
-                                : 'p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800'
-                            }`}
-                            title={action.label}
-                            aria-label={action.label}
-                          >
-                            {action.icon}
-                          </button>
-                        ))}
+                        {actions.map((action, idx) => {
+                          const label =
+                            typeof action.label === 'function' ? action.label(row) : action.label;
+                          const icon =
+                            typeof action.icon === 'function' ? action.icon(row) : action.icon;
+                          const actionClass =
+                            typeof action.className === 'function' ? action.className(row) : action.className;
+                          return (
+                            <button
+                              key={idx}
+                              onClick={() => action.onClick(row)}
+                              className={`inline-flex items-center justify-center rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-100 ${
+                                actionClass
+                                  ? actionClass
+                                  : 'p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+                              }`}
+                              title={label}
+                              aria-label={label}
+                            >
+                              {icon}
+                            </button>
+                          );
+                        })}
                       </div>
                     </td>
                   )}

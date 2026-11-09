@@ -83,6 +83,68 @@ if (loginData.statusCode === 200) {
      handleApiError(error, "An error occured", toast);
   }
 });
+  // Invite setup: confirm the emailed code without leaving the page (verify-reset-otp does not
+  // consume the code, so the same otp is reused when the password is actually set).
+  const verifySetupCodeMutation = useMutation({
+    mutationFn: AuthService.requestotp,
+    onSuccess: (data: any) => {
+      if (data?.data?.statusCode === 200) {
+        toast.success("Verified", "Your setup code is valid.");
+      }
+    },
+    onError: (error: any) => {
+      handleApiError(error, "Code verification", toast);
+    },
+  });
+
+  // Set the password, then sign the admin in so they land straight in the dashboard.
+  const setupPasswordMutation = useMutation({
+    mutationFn: async (data: {
+      email: string;
+      otp: string;
+      newPassword: string;
+      confirmNewPassword: string;
+    }) => {
+      const resetRes = await AuthService.resetpassword({
+        email: data.email,
+        otp: data.otp,
+        newPassword: data.newPassword,
+        confirmNewPassword: data.confirmNewPassword,
+      });
+      if (resetRes?.data?.statusCode !== 200) {
+        const error: any = new Error(resetRes?.data?.message || "Password setup failed.");
+        error.response = resetRes;
+        throw error;
+      }
+      // The password is already changed at this point; a failed sign-in must not read as a
+      // failed setup, so fall back to the login page instead of throwing.
+      try {
+        const loginRes = await AuthService.login({
+          email: data.email,
+          password: data.newPassword,
+        });
+        return { loginRes };
+      } catch {
+        return { loginRes: null };
+      }
+    },
+    onSuccess: async ({ loginRes }: any) => {
+      const loginData = loginRes?.data;
+      if (loginData?.statusCode === 200) {
+        const { authToken, refreshToken, user } = loginData.data;
+        await setAuthData(authToken, refreshToken, user);
+        toast.success("Welcome to BuildConnect", "Your password is set and you're signed in.");
+        router.push(URLS.DASHBOARD.DASHBOARD);
+      } else {
+        toast.success("Password set", "Please sign in with your new password.");
+        router.push(URLS.AUTH.LOGIN);
+      }
+    },
+    onError: (error: any) => {
+      handleApiError(error, "Password setup", toast);
+    },
+  });
+
   const verifyOtpMutation = useMutation({
     mutationFn: AuthService.requestotp,
     onSuccess: (data:any, submittedData :any) => { 
@@ -116,6 +178,8 @@ router.push(
     verifyOtpMutation,
     resendOtpMutation,
     logout,
-    resetPasswordMutation
+    resetPasswordMutation,
+    verifySetupCodeMutation,
+    setupPasswordMutation
    };
 };

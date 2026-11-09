@@ -54,5 +54,11 @@ createAdmin: (data: any): Promise<AxiosResponse<any>> =>
     axiosInstance.patch(`${APIURLS.DASHBOARD.ADMIN}/${id}`, data),
   deleteAdmin: (id: string): Promise<any> =>
     axiosInstance.delete(`${APIURLS.DASHBOARD.ADMIN}/${id}`),
+  activateAdmin: (id: string): Promise<AxiosResponse<any>> =>
+    axiosInstance.patch(`${APIURLS.DASHBOARD.ADMIN}/${id}/activate`),
+  deactivateAdmin: (id: string): Promise<AxiosResponse<any>> =>
+    axiosInstance.patch(`${APIURLS.DASHBOARD.ADMIN}/${id}/deactivate`),
+  resendInvite: (id: string): Promise<AxiosResponse<any>> =>
+    axiosInstance.post(`${APIURLS.DASHBOARD.ADMIN}/${id}/resend-invite`),
 };
 

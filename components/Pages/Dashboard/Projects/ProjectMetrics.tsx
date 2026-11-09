@@ -9,25 +9,25 @@ export default function ProjectMetrics({stats} :any) {
   {
     icon: Building2,
     label: 'Active Projects',
-    value: stats.activeProjects,
+    value: stats?.activeProjects ?? 0,
    
   },
   {
     icon: AlertCircle,
     label: 'Total Milestone',
-    value: stats.totalMilestones,
+    value: stats?.totalMilestones ?? 0,
    
   },
   {
     icon: AlertTriangle,
     label: 'Pending Approval',
-    value: stats.pendingApprovals,
+    value: stats?.pendingApprovals ?? 0,
   
   },
   {
     icon: AlertTriangle,
     label: 'Completed Project',
-    value: stats.completionRate,
+    value: stats?.completedProjects ?? 0,
    
   }
 ];

@@ -177,6 +177,44 @@ const deleteAdminMutation = useMutation({
   },
 });
 
+// Deactivating ends the admin's sessions server-side, so the row has to re-render with the new flag.
+const deactivateAdminMutation = useMutation({
+  mutationFn: (id: string) => UserService.deactivateAdmin(id),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['admins'] });
+    queryClient.invalidateQueries({ queryKey: ['adminDetail'] });
+    toast.success("Success", "Admin account deactivated");
+  },
+  onError: (error: any) => {
+    handleApiError(error, "Failed to deactivate admin", toast);
+  },
+});
+
+const activateAdminMutation = useMutation({
+  mutationFn: (id: string) => UserService.activateAdmin(id),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['admins'] });
+    queryClient.invalidateQueries({ queryKey: ['adminDetail'] });
+    toast.success("Success", "Admin account reactivated");
+  },
+  onError: (error: any) => {
+    handleApiError(error, "Failed to activate admin", toast);
+  },
+});
+
+// Resending issues a fresh setup code and cancels the previous one, so refresh the list/detail.
+const resendInviteMutation = useMutation({
+  mutationFn: (id: string) => UserService.resendInvite(id),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['admins'] });
+    queryClient.invalidateQueries({ queryKey: ['adminDetail'] });
+    toast.success("Success", "Invite resent — a new setup code was emailed.");
+  },
+  onError: (error: any) => {
+    handleApiError(error, "Failed to resend invite", toast);
+  },
+});
+
   return { 
     userQuery,
     singleUserQuery,
@@ -194,6 +232,9 @@ const deleteAdminMutation = useMutation({
     adminDetailQuery,
     createAdminMutation,
     updateAdminMutation,
-    deleteAdminMutation
+    deleteAdminMutation,
+    activateAdminMutation,
+    deactivateAdminMutation,
+    resendInviteMutation
    };
 };
