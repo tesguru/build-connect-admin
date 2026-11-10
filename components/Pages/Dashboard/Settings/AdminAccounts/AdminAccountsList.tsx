@@ -58,19 +58,7 @@ const COLUMNS = [
       </span>
     ),
   },
-  {
-    key: "status",
-    header: "Status",
-    render: (row: any) => (
-      <span
-        className={`px-3 py-1 rounded-md text-sm font-medium ${
-          verificationStyles[row.verificationStatus] ?? "bg-gray-100 text-gray-700"
-        }`}
-      >
-        {formatStatus(row.verificationStatus) || "N/A"}
-      </span>
-    ),
-  },
+ 
   {
     key: "isActive",
     header: "Account",

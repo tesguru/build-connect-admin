@@ -3,23 +3,20 @@ import DashboardLayout from '../DashboardLayout/DashboardLayout'
 import { URLS } from '@/libs/constants/pageurl'
 import Image from 'next/image'
 import { AvatarImage } from '@/libs/constants/image'
-import Button from '@/components/ui/Button/Button'
 import Otherdetails from './Others/Otherdetails'
 import { AlertCircle, AlertTriangle, Building2 } from 'lucide-react'
 import BackButton from '@/components/ui/BackButton'
 import { useUsers } from '@/libs/hooks/useUsers'
-import { formatName, formatStatus } from '@/libs/utils/helpers'
+import { formatName } from '@/libs/utils/helpers'
 import MetricsCard from '@/components/ui/Custom/MetricsCard'
 import { UserDetailsProps } from '../UserDetails/UserDetails'
 import { PageLoader } from '@/components/ui/Custom/LoadingState'
+import { NairaIcon } from '@/components/ui/Custom/NairaIcon'
+import VerificationStatus from '@/components/ui/Custom/VerificationStatus'
 
 const BuilderDetails = ({ id }: UserDetailsProps) => {
-  console.log('Builder ID:', id)
-  
   const { singleBuilderQuery } = useUsers()
-  const { data, isLoading, error } = singleBuilderQuery(id); 
-  
-  console.log('API Response:', data)
+  const { data, isLoading, error } = singleBuilderQuery(id);
 
   // Handle loading state
   if (isLoading) {
@@ -72,7 +69,7 @@ const BuilderDetails = ({ id }: UserDetailsProps) => {
       isPositive: false,
     },
     {
-      icon: AlertTriangle,
+      icon: NairaIcon,
       label: "Total Earned",
       value: `₦${(totals.totalEarned || 0).toLocaleString()}`,
       isPositive: true,
@@ -104,21 +101,15 @@ const BuilderDetails = ({ id }: UserDetailsProps) => {
         </div>
 
         <div className="mt-2">
-          <div className="flex gap-4 mb-4 items-center">
+          <div className="flex gap-4 mb-4 items-center flex-wrap">
             <p className="text-gray-800 font-semibold text-lg">
               {formatName(user.firstName, user.lastName)}
             </p>
-            <Button className={`text-xs ${
-              user.verificationStatus === 'verified' 
-                ? 'bg-green-100 text-green-600' 
-                : user.verificationStatus === 'pending'
-                ? 'bg-yellow-100 text-yellow-600'
-                : user.verificationStatus === 'rejected'
-                ? 'bg-red-100 text-red-600'
-                : 'bg-gray-100 text-gray-600'
-            }`}>
-              {formatStatus(user.verificationStatus) || 'Pending'}
-            </Button>
+            <VerificationStatus
+              id={id}
+              name={formatName(user.firstName, user.lastName)}
+              status={user.verificationStatus}
+            />
           </div>
    
           <div className="flex gap-4 flex-wrap">

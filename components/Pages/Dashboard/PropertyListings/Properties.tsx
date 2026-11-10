@@ -77,7 +77,7 @@ const Properties = () => {
         title: item.title ?? 'Untitled',
         address: item.location ?? 'Location not specified',
         price: item.price ? `₦${Number(item.price).toLocaleString()}` : 'Price on request',
-        image: item.media?.[0]?.url,
+        image: item.coverImage ?? item.media?.[0]?.url,
         status: item.status?.charAt(0).toUpperCase() + item.status?.slice(1),
       })),
     [rawData],

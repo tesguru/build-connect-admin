@@ -1,7 +1,7 @@
 import { DataTable } from "@/components/ui/Datatable";
 import { useState, useMemo } from "react";
 import { useDashboard } from "@/libs/hooks/useDashboard";
-import { cleanName, formatStatus } from "@/libs/utils/helpers";
+import { cleanName, formatMoneyInText, formatStatus } from "@/libs/utils/helpers";
 
 const ACTIVITY_TYPES = [
   'user_registered',
@@ -38,7 +38,7 @@ export default function RecentActivity() {
         id: item.id,
         type: item.type,
         typeLabel: formatStatus(item.type) || '—',
-        description: item.description ?? '—',
+        description: formatMoneyInText(item.description ?? "—"),
         actor: cleanName(item.actor?.name) || 'System',
         entity: item.entityType ? `${formatStatus(item.entityType)} · ${item.entityId ?? '—'}` : '—',
         occurredAt: item.occurredAt,

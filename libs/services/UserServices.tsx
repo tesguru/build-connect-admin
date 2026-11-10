@@ -26,6 +26,8 @@ getallusers: (params :any): Promise<AxiosResponse<any>> =>
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/`, { params }),   
 getSingleUser: (id: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}`),
+updateUserStatus: (id: string, data: any): Promise<AxiosResponse<any>> =>
+    axiosInstance.patch(`${APIURLS.DASHBOARD.USERS}/${id}/status`, data),
 getBids: (id: any, params: any): Promise<AxiosResponse<any>> => 
     axiosInstance.get(`${APIURLS.DASHBOARD.USERS}/${id}/bids`, {params}),
 getBidDetail: (id: string, bidId: string): Promise<any> =>

@@ -6,6 +6,7 @@ import DashboardLayout from "../../DashboardLayout/DashboardLayout";
 import PIotherdetails from "./Piotherdetails";
 import { useEscrow } from "@/libs/hooks/useEscrow";
 import { useState } from "react";
+import { cleanName, formatStatus } from "@/libs/utils/helpers";
 import { NairaIcon } from "@/components/ui/Custom/NairaIcon";
 import { PageLoader, Spinner } from "@/components/ui/Custom/LoadingState";
 
@@ -15,83 +16,66 @@ interface PaymentInstructionDetailsProps {
 
 const statusStyles: Record<string, string> = {
   instruction_sent: "bg-blue-100 text-blue-700",
-  paid: "bg-green-100 text-green-700",
-  cancelled: "bg-red-100 text-red-700",
-  pending: "bg-yellow-100 text-yellow-700",
   processing: "bg-purple-100 text-purple-700",
+  paid: "bg-green-100 text-green-700",
   failed: "bg-red-100 text-red-700",
   reversed: "bg-orange-100 text-orange-700",
+  cancelled: "bg-gray-100 text-gray-700",
 };
 
+// instruction_sent and cancelled are set by the system, not by the admin status endpoint.
 const STATUS_OPTIONS = [
-  { value: "instruction_sent", label: "Instruction Sent" },
   { value: "processing", label: "Processing" },
   { value: "paid", label: "Paid" },
   { value: "failed", label: "Failed" },
   { value: "reversed", label: "Reversed" },
-  { value: "cancelled", label: "Cancelled" },
 ];
 
 const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
-  const { updatePaymentInstructions } = useEscrow();
+  const { paymentInstructionDetailQuery, updatePaymentInstructions } = useEscrow();
+  const { data, isLoading, error } = paymentInstructionDetailQuery(id);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [statusNote, setStatusNote] = useState("");
   const [updateError, setUpdateError] = useState<string | null>(null);
 
-  // --- Temporary fallback until API is ready ---
-  const stored =
-    typeof window !== "undefined"
-      ? sessionStorage.getItem("payment_instruction_detail")
-      : null;
-  const cached = stored ? JSON.parse(stored) : null;
-  const instruction = cached;
-  // ---------------------------------------------
-
-  if (!instruction) {
+  if (isLoading) {
     return (
       <DashboardLayout urlpath={URLS.DASHBOARD.ESCROW}>
-        <div className="bg-gray-50 min-h-screen">
-          <div className="p-4">
-            <BackButton label="Back" />
-            <PageLoader label="Loading payment instruction..." />
-          </div>
+        <PageLoader label="Loading payment instruction..." />
+      </DashboardLayout>
+    );
+  }
+
+  if (error || !data?.data?.data) {
+    return (
+      <DashboardLayout urlpath={URLS.DASHBOARD.ESCROW}>
+        <BackButton label="Back" />
+        <div className="text-center p-8 text-sm text-gray-500">
+          No data available
         </div>
       </DashboardLayout>
     );
   }
 
-  const statusLabel = instruction.status
-    ?.replace(/_/g, " ")
-    .replace(/\b\w/g, (c: string) => c.toUpperCase());
-
-  const statusStyle =
-    statusStyles[instruction.status] ?? "bg-gray-100 text-gray-700";
+  const instruction = data.data.data;
 
   const infoItems: InfoItem[] = [
     {
       icon: User,
       label: "Client",
-      value:
-        instruction.client?.name ||
-        instruction.client?.email ||
-        "Not specified",
+      value: cleanName(instruction.client?.name) || instruction.client?.email || "Not specified",
     },
     {
       icon: Building2,
       label: "Builder",
-      value:
-        instruction.builder?.name ||
-        instruction.builder?.email ||
-        "Not specified",
+      value: cleanName(instruction.builder?.name) || instruction.builder?.email || "Unassigned",
     },
     {
       icon: NairaIcon,
       label: "Amount",
-      value: instruction.amount
-        ? `${instruction.currency ?? "NGN"} ${Number(instruction.amount).toLocaleString()}`
-        : "N/A",
+      value: `₦${Number(instruction.amount ?? 0).toLocaleString()}`,
     },
     {
       icon: Hash,
@@ -101,7 +85,7 @@ const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
   ];
 
   const handleOpenModal = () => {
-    setSelectedStatus(instruction.status ?? "");
+    setSelectedStatus("");
     setStatusNote("");
     setUpdateError(null);
     setIsModalOpen(true);
@@ -116,12 +100,12 @@ const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
     if (!selectedStatus) return;
     setUpdateError(null);
     updatePaymentInstructions.mutate(
-      { instructionId:id, status: selectedStatus, statusUpdateNote: statusNote },
+      { instructionId: id, status: selectedStatus, statusUpdateNote: statusNote },
       {
         onSuccess: () => setIsModalOpen(false),
         onError: (err: any) =>
           setUpdateError(
-            err?.message ?? "Failed to update status. Please try again.",
+            err?.response?.data?.message ?? "Failed to update status. Please try again.",
           ),
       },
     );
@@ -135,16 +119,17 @@ const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
 
           <div className="p-4">
             <div className="flex justify-between mb-6">
-              {/* Left — title + status badge */}
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <h1 className="text-2xl font-bold text-gray-900">
                     {instruction.project?.title ?? "Payment Instruction"}
                   </h1>
                   <span
-                    className={`px-3 py-1 text-sm font-medium rounded-md ${statusStyle}`}
+                    className={`px-3 py-1 text-sm font-medium rounded-md ${
+                      statusStyles[instruction.status] ?? "bg-gray-100 text-gray-700"
+                    }`}
                   >
-                    {statusLabel}
+                    {formatStatus(instruction.status) || "N/A"}
                   </span>
                 </div>
                 <p className="text-sm text-gray-500">
@@ -152,7 +137,6 @@ const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
                 </p>
               </div>
 
-              {/* Right — Update Status button */}
               <div className="flex items-start">
                 <button
                   onClick={handleOpenModal}
@@ -171,25 +155,22 @@ const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
         </div>
       </div>
 
-      {/* ── Update Status Modal ── */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40"
             onClick={handleCloseModal}
           />
 
-          {/* Modal card */}
           <div className="relative z-10 bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-1">
               Update Payment Status
             </h2>
             <p className="text-sm text-gray-500 mb-6">
-              Select a new status for this payment instruction.
+              Record the outcome of this ₦{Number(instruction.amount ?? 0).toLocaleString()} escrow
+              payment to {cleanName(instruction.builder?.name) || "the builder"}.
             </p>
 
-            {/* Status dropdown */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Status <span className="text-red-500">*</span>
@@ -210,20 +191,23 @@ const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
               </select>
             </div>
 
-            {/* Optional note */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Note{" "}
-                <span className="text-gray-400 font-normal">(optional)</span>
+                Note <span className="text-gray-400 font-normal">(optional)</span>
               </label>
               <textarea
                 value={statusNote}
                 onChange={(e) => setStatusNote(e.target.value)}
                 rows={3}
+                maxLength={1000}
                 placeholder="Add a note about this status change..."
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               />
             </div>
+
+            {updateError && (
+              <p className="text-sm text-red-600 mb-4">{updateError}</p>
+            )}
 
             <div className="flex justify-end gap-3">
               <button
@@ -241,10 +225,12 @@ const PaymentInstructionDetails = ({ id }: PaymentInstructionDetailsProps) => {
                 {updatePaymentInstructions.isPending ? (
                   <>
                     <Spinner className="h-4 w-4" />
-                    Updating...
+                    Saving...
                   </>
+                ) : selectedStatus ? (
+                  `Mark as ${formatStatus(selectedStatus)}`
                 ) : (
-                  "Update Status"
+                  "Confirm Status"
                 )}
               </button>
             </div>

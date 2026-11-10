@@ -46,7 +46,7 @@ const WFTimeline = ({ funding }: any) => {
         </div>
 
         <div>
-          <h2 className="text-xl font-bold mb-4">Completion</h2>
+          <h2 className="text-xl font-bold mb-4">Verification</h2>
           <ul className="space-y-4">
             <TimelineRow
               label="Verified At"

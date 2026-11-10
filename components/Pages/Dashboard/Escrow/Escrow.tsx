@@ -11,7 +11,7 @@ export default function Escrow() {
   
 
   const tabs = [
-    { id: 'paymentinstructions', label: 'PaymentInstructions' },
+    { id: 'paymentinstructions', label: 'Payment Instructions' },
     { id: 'walletfunding', label: 'Wallet Funding' },
     
   ];

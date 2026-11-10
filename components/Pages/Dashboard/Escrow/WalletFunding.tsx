@@ -3,7 +3,13 @@ import { useEscrow } from "@/libs/hooks/useEscrow";
 import { Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
-import { formatName } from "@/libs/utils/helpers";
+import { cleanName, formatStatus } from "@/libs/utils/helpers";
+
+const statusStyles: Record<string, string> = {
+  pending_verification: "bg-amber-100 text-amber-800",
+  successful: "bg-green-100 text-green-700",
+  rejected: "bg-red-100 text-red-700",
+};
 
 const COLUMNS = [
   {
@@ -20,9 +26,7 @@ const COLUMNS = [
     key: "amount",
     header: "Amount",
     render: (row: any) => (
-      <span className="font-semibold">
-        {row.currency} {Number(row.amount).toLocaleString()}
-      </span>
+      <span className="font-semibold">₦{Number(row.amount).toLocaleString()}</span>
     ),
   },
   {
@@ -35,49 +39,23 @@ const COLUMNS = [
   {
     key: "status",
     header: "Status",
-    render: (row: any) => {
-      const statusStyles: Record<string, string> = {
-        pending_verification: "bg-yellow-100 text-yellow-700",
-        verified: "bg-green-100 text-green-700",
-        rejected: "bg-red-100 text-red-700",
-        pending: "bg-gray-100 text-gray-700",
-      };
-      const style = statusStyles[row.status] || "bg-gray-100 text-gray-700";
-      const label = row.status
-        ?.replace(/_/g, " ")
-        .replace(/\b\w/g, (c: string) => c.toUpperCase());
-      return (
-        <span className={`px-3 py-1 rounded-md text-sm font-medium ${style}`}>
-          {label}
-        </span>
-      );
-    },
+    render: (row: any) => (
+      <span
+        className={`px-3 py-1 rounded-md text-sm font-medium ${
+          statusStyles[row.status] || "bg-gray-100 text-gray-700"
+        }`}
+      >
+        {formatStatus(row.status) || "N/A"}
+      </span>
+    ),
   },
   {
     key: "paymentDate",
     header: "Payment Date",
     render: (row: any) => (
       <span>
-        {row.paymentDate
-          ? new Date(row.paymentDate).toLocaleDateString()
-          : "N/A"}
+        {row.paymentDate ? new Date(row.paymentDate).toLocaleDateString() : "N/A"}
       </span>
-    ),
-  },
-  {
-    key: "verifiedAt",
-    header: "Verified At",
-    render: (row: any) => (
-      <span>
-        {row.verifiedAt ? new Date(row.verifiedAt).toLocaleDateString() : "—"}
-      </span>
-    ),
-  },
-  {
-    key: "note",
-    header: "Note",
-    render: (row: any) => (
-      <span className="text-sm text-gray-500">{row.note || "—"}</span>
     ),
   },
 ];
@@ -86,13 +64,15 @@ export default function WalletFunding() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<string | undefined>(undefined);
 
   const { getWalletFundingQuery } = useEscrow();
   const { data, isLoading } = getWalletFundingQuery({
     page,
     limit,
     search: search || undefined,
+    status,
   });
 
   const rawData = data?.data?.data || [];
@@ -101,24 +81,13 @@ export default function WalletFunding() {
   const tableData = useMemo(
     () =>
       rawData.map((item: any) => ({
-        // Keep full raw item to store on click
-        _raw: item,
-
-        // Display fields
         id: item.id,
-        clientName:
-          formatName(item.client?.name) ||
-          formatName(item.client?.firstName, item.client?.lastName) ||
-          "N/A",
+        clientName: cleanName(item.client?.name) || item.client?.email || "N/A",
         clientEmail: item.client?.email || "",
         amount: item.amount ?? 0,
-        currency: item.currency || "NGN",
         reference: item.reference,
         status: item.status,
         paymentDate: item.paymentDate,
-        verifiedAt: item.verifiedAt,
-        note: item.note,
-        proofDocument: item.proofDocument,
       })),
     [rawData],
   );
@@ -128,14 +97,7 @@ export default function WalletFunding() {
       {
         label: "View",
         icon: <Eye className="w-4 h-4 text-gray-600" />,
-        onClick: (row: any) => {
-          // Store full raw item — detail page reads this as fallback while API isn't ready
-          sessionStorage.setItem(
-            "wallet_funding_detail",
-            JSON.stringify(row._raw),
-          );
-          router.push(`/wallet-funding-details/${row.id}`);
-        },
+        onClick: (row: any) => router.push(`/wallet-funding-details/${row.id}`),
       },
     ],
     [router],
@@ -146,7 +108,7 @@ export default function WalletFunding() {
       <div>
         <p className="text-2xl font-bold">Wallet Funding</p>
         <p className="text-md text-gray-500">
-          Review and verify client wallet funding requests
+          Check the proof of payment, then approve to credit the client&apos;s wallet or reject the request
         </p>
       </div>
 
@@ -159,7 +121,22 @@ export default function WalletFunding() {
           defaultRowsPerPage={limit}
           showSearch={true}
           searchPlaceholder="Search wallet funding..."
-          searchableColumns={["clientName", "clientEmail", "reference", "status"]}
+          searchableColumns={["clientName", "clientEmail", "reference"]}
+          filters={[
+            {
+              key: "status",
+              label: "Status",
+              options: [
+                { value: "pending_verification", label: "Pending Verification" },
+                { value: "successful", label: "Successful" },
+                { value: "rejected", label: "Rejected" },
+              ],
+            },
+          ]}
+          onFilterChange={(active) => {
+            setStatus(active.status && active.status !== "all" ? active.status : undefined);
+            setPage(1);
+          }}
           showSerialNumber={true}
           isLoading={isLoading}
           serverSide={true}

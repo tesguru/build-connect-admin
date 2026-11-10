@@ -26,7 +26,6 @@ const userQuery = (params: any) => {
 };
 
 const singleUserQuery = (id :any) => {
-    console.log(id)
   return useQuery({
     queryKey: ['singleuser', id], 
     queryFn: () => UserService.getSingleUser(id),
@@ -40,6 +39,20 @@ const singleBuilderQuery = (id: string) => {
       enabled: !!id,
     });
   };
+
+const updateUserStatusMutation = useMutation({
+  mutationFn: ({ id, data }: { id: string; data: any }) =>
+    UserService.updateUserStatus(id, data),
+  onSuccess: (_res, variables) => {
+    queryClient.invalidateQueries({ queryKey: ['users'] });
+    queryClient.invalidateQueries({ queryKey: ['singleuser', variables.id] });
+    queryClient.invalidateQueries({ queryKey: ['builder', variables.id] });
+    toast.success("Success", "User status updated");
+  },
+  onError: (error: any) => {
+    handleApiError(error, "Failed to update user status", toast);
+  },
+});
 
 const activityQuery = (id :string, params: object) => {
   return useQuery({
@@ -222,6 +235,7 @@ const resendInviteMutation = useMutation({
     projectsQuery,
     documentsQuery,
     singleBuilderQuery,
+    updateUserStatusMutation,
     createClientMutation,
     createBuildersMutation,
     bidQuery,

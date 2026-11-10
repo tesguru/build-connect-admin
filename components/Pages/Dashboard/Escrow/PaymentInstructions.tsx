@@ -3,7 +3,25 @@ import { useEscrow } from "@/libs/hooks/useEscrow";
 import { Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
-import { formatName } from "@/libs/utils/helpers";
+import { cleanName, formatStatus } from "@/libs/utils/helpers";
+
+const statusStyles: Record<string, string> = {
+  instruction_sent: "bg-blue-100 text-blue-700",
+  processing: "bg-purple-100 text-purple-700",
+  paid: "bg-green-100 text-green-700",
+  failed: "bg-red-100 text-red-700",
+  reversed: "bg-orange-100 text-orange-700",
+  cancelled: "bg-gray-100 text-gray-700",
+};
+
+const STATUS_OPTIONS = [
+  { value: "instruction_sent", label: "Instruction Sent" },
+  { value: "processing", label: "Processing" },
+  { value: "paid", label: "Paid" },
+  { value: "failed", label: "Failed" },
+  { value: "reversed", label: "Reversed" },
+  { value: "cancelled", label: "Cancelled" },
+];
 
 const COLUMNS = [
   {
@@ -24,46 +42,29 @@ const COLUMNS = [
   {
     key: "milestone",
     header: "Milestone",
-    render: (row: any) => <span>{row.milestone}</span>,
+    render: (row: any) => (
+      <span className="block max-w-[220px] truncate" title={row.milestone}>
+        {row.milestone}
+      </span>
+    ),
   },
   {
     key: "amount",
     header: "Amount",
     render: (row: any) => (
-      <span className="font-semibold">
-        {row.currency} {Number(row.amount).toLocaleString()}
-      </span>
+      <span className="font-semibold">₦{Number(row.amount).toLocaleString()}</span>
     ),
   },
   {
     key: "status",
     header: "Status",
-    render: (row: any) => {
-      const statusStyles: Record<string, string> = {
-        instruction_sent: "bg-blue-100 text-blue-700",
-        paid: "bg-green-100 text-green-700",
-        cancelled: "bg-red-100 text-red-700",
-        pending: "bg-yellow-100 text-yellow-700",
-      };
-      const style = statusStyles[row.status] || "bg-gray-100 text-gray-700";
-      const label = row.status
-        ?.replace(/_/g, " ")
-        .replace(/\b\w/g, (c: string) => c.toUpperCase());
-      return (
-        <span className={`px-3 py-1 rounded-md text-sm font-medium ${style}`}>
-          {label}
-        </span>
-      );
-    },
-  },
-  {
-    key: "instructionSentAt",
-    header: "Instruction Sent",
     render: (row: any) => (
-      <span>
-        {row.instructionSentAt
-          ? new Date(row.instructionSentAt).toLocaleDateString()
-          : "N/A"}
+      <span
+        className={`px-3 py-1 rounded-md text-sm font-medium ${
+          statusStyles[row.status] || "bg-gray-100 text-gray-700"
+        }`}
+      >
+        {formatStatus(row.status) || "N/A"}
       </span>
     ),
   },
@@ -71,9 +72,7 @@ const COLUMNS = [
     key: "paidAt",
     header: "Paid At",
     render: (row: any) => (
-      <span>
-        {row.paidAt ? new Date(row.paidAt).toLocaleDateString() : "—"}
-      </span>
+      <span>{row.paidAt ? new Date(row.paidAt).toLocaleDateString() : "—"}</span>
     ),
   },
 ];
@@ -82,13 +81,15 @@ export default function PaymentInstructions() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(8);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<string | undefined>(undefined);
 
   const { paymentInstructions } = useEscrow();
   const { data, isLoading } = paymentInstructions({
     page,
     limit,
     search: search || undefined,
+    status,
   });
 
   const rawData = data?.data?.data || [];
@@ -97,29 +98,14 @@ export default function PaymentInstructions() {
   const tableData = useMemo(
     () =>
       rawData.map((item: any) => ({
-        // Keep full raw item so we can store it on click
-        _raw: item,
-
-        // Display fields
         id: item.id,
         project: item.project?.title || "N/A",
-        client:
-          formatName(item.client?.name) ||
-          formatName(item.client?.firstName, item.client?.lastName) ||
-          item.client?.email ||
-          "N/A",
-        builder:
-          formatName(item.builder?.name) ||
-          formatName(item.builder?.firstName, item.builder?.lastName) ||
-          item.builder?.email ||
-          "N/A",
+        client: cleanName(item.client?.name) || item.client?.email || "N/A",
+        builder: cleanName(item.builder?.name) || item.builder?.email || "Unassigned",
         milestone: item.milestone?.name || "N/A",
         amount: item.amount ?? 0,
-        currency: item.currency || "NGN",
         status: item.status,
-        instructionSentAt: item.instructionSentAt,
         paidAt: item.paidAt,
-        note: item.note,
       })),
     [rawData],
   );
@@ -129,13 +115,7 @@ export default function PaymentInstructions() {
       {
         label: "View",
         icon: <Eye className="w-4 h-4 text-gray-600" />,
-        onClick: (row: any) => {
-          sessionStorage.setItem(
-            "payment_instruction_detail",
-            JSON.stringify(row._raw),
-          );
-          router.push(`/payment-instruction-details/${row.id}`);
-        },
+        onClick: (row: any) => router.push(`/payment-instruction-details/${row.id}`),
       },
     ],
     [router],
@@ -146,7 +126,7 @@ export default function PaymentInstructions() {
       <div>
         <p className="text-2xl font-bold">Payment Instructions</p>
         <p className="text-md text-gray-500">
-          Manage and track all escrow payment instructions
+          Escrow payments released to builders against completed project milestones
         </p>
       </div>
 
@@ -159,7 +139,12 @@ export default function PaymentInstructions() {
           defaultRowsPerPage={limit}
           showSearch={true}
           searchPlaceholder="Search payment instructions..."
-          searchableColumns={["project", "client", "builder", "status"]}
+          searchableColumns={["project", "client", "builder", "milestone"]}
+          filters={[{ key: "status", label: "Status", options: STATUS_OPTIONS }]}
+          onFilterChange={(active) => {
+            setStatus(active.status && active.status !== "all" ? active.status : undefined);
+            setPage(1);
+          }}
           showSerialNumber={true}
           isLoading={isLoading}
           serverSide={true}

@@ -31,3 +31,12 @@ export const formatStatus = (value?: string | null) =>
         .replace(/\b\w/g, (char) => char.toUpperCase())
         .trim()
     : "";
+
+// Activity text carries ungrouped amounts ("NGN 1500000.00"); only currency-prefixed
+// numbers are grouped so ids and timestamps inside titles stay untouched.
+export const formatMoneyInText = (text: string) =>
+  text.replace(/\b(?:NGN|₦)\s*(\d[\d,]*(?:\.\d+)?)/gi, (_match, value: string) =>
+    `₦${Number(value.replace(/,/g, "")).toLocaleString("en-NG", {
+      maximumFractionDigits: 2,
+    })}`,
+  );
