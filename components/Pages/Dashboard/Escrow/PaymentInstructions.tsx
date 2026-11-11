@@ -40,15 +40,6 @@ const COLUMNS = [
     render: (row: any) => <span>{row.builder}</span>,
   },
   {
-    key: "milestone",
-    header: "Milestone",
-    render: (row: any) => (
-      <span className="block max-w-[220px] truncate" title={row.milestone}>
-        {row.milestone}
-      </span>
-    ),
-  },
-  {
     key: "amount",
     header: "Amount",
     render: (row: any) => (
@@ -138,8 +129,8 @@ export default function PaymentInstructions() {
           rowsPerPageOptions={[5, 8, 10, 20]}
           defaultRowsPerPage={limit}
           showSearch={true}
-          searchPlaceholder="Search payment instructions..."
-          searchableColumns={["project", "client", "builder", "milestone"]}
+          searchPlaceholder="Search payment instructions by project, client, builder..."
+          searchableColumns={["project", "client", "builder", "milestone", "amount", "status", "paidAt"]}
           filters={[{ key: "status", label: "Status", options: STATUS_OPTIONS }]}
           onFilterChange={(active) => {
             setStatus(active.status && active.status !== "all" ? active.status : undefined);

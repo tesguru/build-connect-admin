@@ -4,7 +4,7 @@ import Clients from './Clients';
 import { URLS } from '@/libs/constants/pageurl';
 import Builders from './Builders';
 
-// ✅ Move static data OUTSIDE the component so it's never recreated on re-render
+
 const TABS = [
   { id: 'clients', label: 'Clients' },
   { id: 'builders', label: 'Builders' },

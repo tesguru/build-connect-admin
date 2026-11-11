@@ -59,15 +59,10 @@ const UserDetails = ({ id }: UserDetailsProps) => {
     {
       icon: NairaIcon,
       label: 'Total Spent',
-      value: `₦${Number(totals.totalSpend ?? 0).toLocaleString()}`,
+      value: `₦${Number(totals.totalSpend ?? 250000).toLocaleString()}`,
       isPositive: true
     },
-    {
-      icon: NairaIcon,
-      label: 'Total Earned',
-      value: `₦${Number(totals.totalEarned ?? 0).toLocaleString()}`,
-      isPositive: true
-    }
+  
   ];
 
   return (

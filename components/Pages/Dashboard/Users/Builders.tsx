@@ -16,7 +16,6 @@ const COLUMNS = [
   { key: 'name', header: 'Name' },
   { key: 'email', header: 'Email Address' },
   { key: 'phonenumber', header: 'Phone Number' },
-  { key: 'location', header: 'Location' },
   { key: 'projects', header: 'Projects' },
   {
     key: 'verificationStatus',

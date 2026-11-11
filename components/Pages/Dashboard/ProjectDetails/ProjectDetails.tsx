@@ -62,6 +62,23 @@ const ProjectDetails = ({ id }: UserDetailsProps) => {
     );
   }
 
+  // Budget: API returns budgetMin / budgetMax
+  const formatBudget = () => {
+    const min = Number(project?.budgetMin);
+    const max = Number(project?.budgetMax);
+    const hasMin = !isNaN(min) && min > 0;
+    const hasMax = !isNaN(max) && max > 0;
+
+    if (hasMin && hasMax) {
+      return min === max
+        ? `₦${max.toLocaleString()}`
+        : `₦${min.toLocaleString()} - ₦${max.toLocaleString()}`;
+    }
+    if (hasMax) return `₦${max.toLocaleString()}`;
+    if (hasMin) return `₦${min.toLocaleString()}`;
+    return "₦0";
+  };
+
   // Now we can safely use project data
   const projectInfo: InfoItem[] = [
     {
@@ -77,7 +94,7 @@ const ProjectDetails = ({ id }: UserDetailsProps) => {
     {
       icon: NairaIcon,
       label: 'Budget',
-      value: project?.budgetAmount ? `₦${Number(project.budgetAmount).toLocaleString()}` : "₦0"
+      value: formatBudget()
     },
   ];
 
@@ -106,7 +123,7 @@ const ProjectDetails = ({ id }: UserDetailsProps) => {
 
             <InfoGrid items={projectInfo} />
           </div>
-          <Otherdetails project={project}  />
+          <Otherdetails project={project} />
         </div>
       </div>
     </DashboardLayout>
